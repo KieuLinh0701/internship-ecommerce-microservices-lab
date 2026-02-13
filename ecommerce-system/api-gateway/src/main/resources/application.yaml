@@ -25,6 +25,42 @@ spring:
             - Path=/customer-service/**
           filters:
             - RewritePath=/customer-service/(?<segment>.*), /$\{segment}
+
+        - id: cart-service
+          uri: lb://cart-service
+          predicates:
+            - Path=/cart-service/**
+          filters:
+            - RewritePath=/cart-service/(?<segment>.*), /$\{segment}
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/order-service/**
+          filters:
+            - RewritePath=/order-service/(?<segment>.*), /$\{segment}
+
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/payment-service/**
+          filters:
+            - RewritePath=/payment-service/(?<segment>.*), /$\{segment}
+
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/inventory-service/**
+          filters:
+            - RewritePath=/inventory-service/(?<segment>.*), /$\{segment}
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification-service/**
+          filters:
+            - RewritePath=/notification-service/(?<segment>.*), /$\{segment}
+
   security:
     oauth2:
       resource-server:
