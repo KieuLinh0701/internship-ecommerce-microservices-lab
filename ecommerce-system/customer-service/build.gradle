@@ -44,6 +44,12 @@ dependencies {
     // Spring Boot Test Starter: Provides testing utilities for Spring Boot applications
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // MapStruct: Code generator for mapping between Java bean types
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    // Lombok + MapStruct binding
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 }
 
 test {

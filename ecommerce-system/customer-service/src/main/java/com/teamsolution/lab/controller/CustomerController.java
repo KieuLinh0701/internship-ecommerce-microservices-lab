@@ -1,27 +1,38 @@
 package com.teamsolution.lab.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.teamsolution.lab.dto.CustomerDto;
+import com.teamsolution.lab.response.ApiResponse;
+import com.teamsolution.lab.service.CustomerService;
+import java.util.UUID;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/customers")
-public class CustomerController {
+@RequestMapping("/me")
+public class CustomerController extends BaseController<CustomerDto, UUID> {
 
-  // test
-  @GetMapping("/info")
-  public Map<String, Object> getCustomerInfo() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+  private final CustomerService customerService;
 
-    Map<String, Object> response = new HashMap<>();
-    response.put("message", "This is protected customer info!");
-    response.put("user", auth.getName());
-    response.put("authorities", auth.getAuthorities());
+  protected CustomerController(CustomerService customerService) {
+    super(customerService);
+    this.customerService = customerService;
+  }
 
-    return response;
+  @GetMapping
+  public ResponseEntity<ApiResponse<CustomerDto>> getMe(@AuthenticationPrincipal Jwt jwt) {
+
+    String id = jwt.getClaim("account_id");
+    UUID accountId = UUID.fromString(id);
+
+    return ResponseEntity.ok(ApiResponse.success(customerService.getByAccountId(accountId)));
+  }
+
+  @GetMapping("/test")
+  public ResponseEntity<ApiResponse<String>> test() {
+    return ResponseEntity.ok(ApiResponse.success("Hi, this is a test endpoint!"));
   }
 }

@@ -9,28 +9,28 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Set;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "m_role")
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(force = true)
+@SuperBuilder
 public class Role extends BaseEntity {
 
-  @Column(unique = true, nullable = false, length = 50)
+  @Column(name = "name")
   private String name;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "status", nullable = false, length = 20)
+  @Column(name = "status")
+  @Builder.Default
   private RoleStatus status = RoleStatus.ACTIVE;
 
   @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)

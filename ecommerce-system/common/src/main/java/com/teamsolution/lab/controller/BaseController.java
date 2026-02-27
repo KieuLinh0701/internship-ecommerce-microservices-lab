@@ -40,7 +40,7 @@ public abstract class BaseController<D, ID> {
     return ResponseEntity.ok(ApiResponse.success(service.getById(id)));
   }
 
-  @GetMapping(produces = "application/json")
+  @GetMapping(value = "/all", produces = "application/json")
   public ResponseEntity<ApiResponse<List<D>>> getAll() {
     return ResponseEntity.ok(ApiResponse.success(service.getAll()));
   }

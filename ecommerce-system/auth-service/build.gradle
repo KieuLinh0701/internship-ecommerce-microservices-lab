@@ -40,6 +40,8 @@ dependencies {
     // Common module: Shared utilities and models
     implementation project(':common')
 
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
     // PostgreSQL driver for database connectivity
     runtimeOnly 'org.postgresql:postgresql'
 

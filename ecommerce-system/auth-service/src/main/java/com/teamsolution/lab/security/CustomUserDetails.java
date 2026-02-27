@@ -2,21 +2,17 @@ package com.teamsolution.lab.security;
 
 import com.teamsolution.lab.entity.Account;
 import com.teamsolution.lab.entity.AccountRole;
-import java.util.Collection;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.teamsolution.lab.enums.AccountStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class CustomUserDetails implements UserDetails {
+import java.util.Collection;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-  private Account account;
-
-  public CustomUserDetails(Account account) {
-    this.account = account;
-  }
+public record CustomUserDetails(Account account) implements UserDetails {
 
   public UUID getAccountId() {
     return account.getId();
@@ -62,6 +58,6 @@ public class CustomUserDetails implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return account.isVerified();
+    return account.getStatus() == AccountStatus.PENDING;
   }
 }

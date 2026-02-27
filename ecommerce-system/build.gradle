@@ -41,6 +41,14 @@ allprojects {
         configFile = file("${rootProject.projectDir}/checkstyle.xml")
     }
 
+    tasks.named('checkstyleMain') {
+        source = fileTree('src/main/java')
+    }
+
+    tasks.named('checkstyleTest') {
+        source = fileTree('src/test/java')
+    }
+
     // Automatically run Spotless before building
     tasks.named('build') {
         dependsOn 'spotlessApply'

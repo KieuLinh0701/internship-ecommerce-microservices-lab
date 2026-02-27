@@ -1,6 +1,10 @@
 server:
   port: 9007
 
+grpc:
+  server:
+    port: 9097
+
 spring:
   application:
     name: notification-service
@@ -10,6 +14,18 @@ spring:
     username: postgres
     password: root
     driver-class-name: org.postgresql.Driver
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${EMAIL_USERNAME}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
   jpa:
     hibernate:
@@ -35,8 +51,15 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+  instance:
+    metadata-map:
+      grpcPort: 9092
 
 logging:
+  file:
+    name: logs/notification-service.log
   level:
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
+    root: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

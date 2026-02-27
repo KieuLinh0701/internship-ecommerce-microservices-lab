@@ -1,44 +1,41 @@
 package com.teamsolution.lab.entity;
 
 import com.teamsolution.lab.enums.AccountStatus;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.Set;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "accounts")
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(force = true)
+@SuperBuilder
 public class Account extends BaseEntity {
 
-  @Column(unique = true, nullable = false)
+  @Column(name = "email")
   private String email;
 
-  @Column(nullable = false)
+  @Column(name = "password")
   private String password;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "status", nullable = false, length = 20)
-  private AccountStatus status = AccountStatus.INACTIVE;
+  @Column(name = "status")
+  @Builder.Default
+  private AccountStatus status = AccountStatus.PENDING;
 
-  @Column(name = "is_verified", nullable = false)
-  private boolean isVerified = false;
-
-  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "account")
   private Set<AccountRole> accountRoles;
 }

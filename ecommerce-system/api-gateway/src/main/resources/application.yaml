@@ -15,57 +15,71 @@ spring:
         - id: auth-service
           uri: lb://auth-service
           predicates:
-            - Path=/auth-service/**
+            - Path=/api/auth/**
           filters:
-            - RewritePath=/auth-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/auth/(?<segment>.*), /$\{segment}
+
+        - id: auth-service-oauth2
+          uri: lb://auth-service
+          predicates:
+            - Path=/login/oauth2/code/google
 
         - id: customer-service
           uri: lb://customer-service
           predicates:
-            - Path=/customer-service/**
+            - Path=/api/customers/**
           filters:
-            - RewritePath=/customer-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/customers/(?<segment>.*), /$\{segment}
 
         - id: cart-service
           uri: lb://cart-service
           predicates:
-            - Path=/cart-service/**
+            - Path=/api/cart/**
           filters:
-            - RewritePath=/cart-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/cart/(?<segment>.*), /$\{segment}
 
         - id: order-service
           uri: lb://order-service
           predicates:
-            - Path=/order-service/**
+            - Path=/api/orders/**
           filters:
-            - RewritePath=/order-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/orders/(?<segment>.*), /$\{segment}
 
         - id: payment-service
           uri: lb://payment-service
           predicates:
-            - Path=/payment-service/**
+            - Path=/api/payments/**
           filters:
-            - RewritePath=/payment-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/payments/(?<segment>.*), /$\{segment}
 
         - id: inventory-service
           uri: lb://inventory-service
           predicates:
-            - Path=/inventory-service/**
+            - Path=/api/inventory/**
           filters:
-            - RewritePath=/inventory-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/inventory/(?<segment>.*), /$\{segment}
 
         - id: notification-service
           uri: lb://notification-service
           predicates:
-            - Path=/notification-service/**
+            - Path=/api/notifications/**
           filters:
-            - RewritePath=/notification-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/api/notifications/(?<segment>.*), /$\{segment}
 
   security:
     oauth2:
       resource-server:
         jwt:
           jwk-set-uri: http://localhost:9001/oauth2/jwks
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+            redirect-uri: http://localhost:9000/login/oauth2/code/google
 
 eureka:
   client:
@@ -75,3 +89,7 @@ eureka:
 logging:
   level:
     org.springframework.security.oauth2.client: DEBUG
+
+app:
+  auth-service:
+    google-login-uri: lb://auth-service/oauth2/google
