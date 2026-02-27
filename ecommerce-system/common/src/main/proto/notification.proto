@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package notification;
+
+option java_package = "com.teamsolution.lab.grpc.notification";
+option java_multiple_files = true;
+
+service NotificationService {
+    rpc SendEmail(EmailRequest) returns (EmailResponse);
+}
+
+message EmailRequest {
+    string user_id = 1;
+    string to = 2;
+    string event_type = 3;
+    map<string, string> template_vars = 4;
+}
+
+message EmailResponse {
+    bool success = 1;
+    string message = 2;
+}

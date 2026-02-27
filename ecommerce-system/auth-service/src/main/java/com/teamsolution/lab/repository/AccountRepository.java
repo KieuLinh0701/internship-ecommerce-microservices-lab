@@ -12,6 +12,8 @@ import org.springframework.data.repository.query.Param;
 public interface AccountRepository extends BaseRepository<Account, UUID> {
   Optional<Account> findByEmail(String email);
 
+  boolean existsByEmail(String email);
+
   @Query(
       """
           SELECT DISTINCT a

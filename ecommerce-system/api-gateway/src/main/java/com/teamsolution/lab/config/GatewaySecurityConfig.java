@@ -1,8 +1,10 @@
 package com.teamsolution.lab.config;
 
+import com.teamsolution.lab.security.GoogleOAuth2SuccessHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
@@ -17,25 +19,25 @@ public class GatewaySecurityConfig {
   private String jwkSetUri;
 
   @Bean
-  public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+  public SecurityWebFilterChain springSecurityFilterChain(
+      ServerHttpSecurity http, GoogleOAuth2SuccessHandler successHandler) {
     http.csrf(ServerHttpSecurity.CsrfSpec::disable)
         .authorizeExchange(
             exchanges ->
                 exchanges
                     // Public endpoints
-                    .pathMatchers("/auth-service/auth/**")
+                    .pathMatchers("/api/auth/**")
                     .permitAll()
-                    .pathMatchers("/auth-service/oauth2/**")
+                    .pathMatchers("/login/oauth2/code/**")
                     .permitAll()
-                    .pathMatchers("/auth-service/.well-known/**")
+                    .pathMatchers("/oauth2/**")
                     .permitAll()
 
                     // All other requests need
                     .anyExchange()
                     .authenticated())
-
-        // The gateway only validates the JWT and does NOT check authorities.
-        .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtDecoder(reactiveJwtDecoder())));
+        .oauth2Login(Customizer.withDefaults())
+        .oauth2Login(oauth2 -> oauth2.authenticationSuccessHandler(successHandler));
 
     // CORS configuration for the frontend UI
     //        http.cors(cors -> cors.configurationSource(request -> {

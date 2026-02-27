@@ -1,6 +1,12 @@
 server:
   port: 9001
 
+grpc:
+  server:
+    port: 9091
+    security:
+      enabled: false
+
 spring:
   application:
     name: auth-service
@@ -25,19 +31,6 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
 
-  security:
-    oauth2:
-      authorization-server:
-        issuer-uri: http://localhost:9001
-      clients:
-        gateway:
-          client-id: gateway-client
-          client-secret: ${GATEWAY_CLIENT_SECRET}
-          client-name: API Gateway Client
-          redirect-uri: http://localhost:9000/login/oauth2/code/gateway-client
-          access-token-ttl: 15m
-          refresh-token-ttl: 7d
-
 logging:
   file:
     name: logs/auth-service.log
@@ -51,8 +44,14 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+  instance:
+    metadata-map:
+      grpcPort: 9091
 
 jwt:
   private-key: ${JWT_PRIVATE_KEY}
   public-key: ${JWT_PUBLIC_KEY}
   key-id: "auth-service-v1"
+  issuer: "http://localhost:9001"
+  access-token-expiration: 3600
+  refresh-token-expiration: 604800

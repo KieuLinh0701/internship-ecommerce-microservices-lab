@@ -18,6 +18,10 @@ repositories {
 }
 
 dependencies {
+    // Lombok: Reduces boilerplate code (getter, setter, constructor, builder, etc.)
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
     // Spring Cloud Gateway: builds the reactive API Gateway
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
 
@@ -26,6 +30,8 @@ dependencies {
 
     // OAuth2 Resource Server: validates JWT tokens at the gateway
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     // Spring Boot Test: testing support
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

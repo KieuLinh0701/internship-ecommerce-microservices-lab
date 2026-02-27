@@ -1,6 +1,8 @@
 package com.teamsolution.lab.service;
 
-import org.springframework.stereotype.Service;
+import com.teamsolution.lab.dto.CustomerDto;
+import java.util.UUID;
 
-@Service
-public class CustomerService {}
+public interface CustomerService extends BaseService<CustomerDto, UUID> {
+  CustomerDto getByAccountId(UUID accountId);
+}

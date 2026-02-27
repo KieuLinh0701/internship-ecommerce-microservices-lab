@@ -12,43 +12,45 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.annotation.CreatedBy;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "account_roles")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(force = true)
+@SuperBuilder
 public class AccountRole {
 
   @EmbeddedId private AccountRoleId id = new AccountRoleId();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("accountId")
-  @JoinColumn(name = "account_id", nullable = false)
+  @JoinColumn(name = "account_id")
   private Account account;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @MapsId("roleId")
-  @JoinColumn(name = "role_id", nullable = false)
+  @JoinColumn(name = "role_id")
   private Role role;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "status", nullable = false, length = 20)
+  @Column(name = "status")
+  @Builder.Default
   private AccountRoleStatus status = AccountRoleStatus.ACTIVE;
 
   @CreationTimestamp
-  @Column(name = "created_at", updatable = false)
+  @Column(name = "created_at")
   private LocalDateTime createdAt;
 
   @UpdateTimestamp
@@ -57,12 +59,13 @@ public class AccountRole {
 
   @CreatedBy
   @Column(name = "created_by", updatable = false)
-  private String createdBy;
+  private UUID createdBy;
 
   @Column(name = "updated_by")
-  private String updatedBy;
+  private UUID updatedBy;
 
   @Column(name = "is_delete")
+  @Builder.Default
   private Boolean isDelete = false;
 
   @Version

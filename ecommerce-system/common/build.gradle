@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'com.google.protobuf' version '0.9.6'
 }
 
 version = '0.0.1-SNAPSHOT'
@@ -18,13 +19,55 @@ dependencies {
     // MapStruct: Generates code for mapping between Entity and DTO
     api 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    // gRPC: Framework for high-performance inter-service communication
+    api 'io.grpc:grpc-netty-shaded:1.68.0'    // Network transport layer for gRPC
+    api 'io.grpc:grpc-protobuf:1.68.0'        // Protobuf serialization support
+    api 'io.grpc:grpc-stub:1.68.0'            // Generated stub classes for client/server
+    api 'net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE'
+    api 'net.devh:grpc-client-spring-boot-starter:3.1.0.RELEASE'
+
+    // Eureka Client — service discovery for gRPC target resolution
+    api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    // Required for generated gRPC code — javax.annotation.Generated
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
 }
 
 // Configure annotation processor order: Lombok must run before MapStruct
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += [
             '-Amapstruct.defaultComponentModel=spring'
     ]
+}
+
+// Protobuf config: generate Java + gRPC classes from .proto files
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.25.1'
+    }
+    plugins {
+        create('grpc') {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.68.0'
+        }
+    }
+    generateProtoTasks {
+        all().configureEach { task ->
+            task.plugins {
+                create('grpc')
+            }
+        }
+    }
+}
+
+// Add generated proto sources to Java source sets
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'   // Generated gRPC classes
+            srcDirs 'build/generated/source/proto/main/java'   // Generated Protobuf classes
+        }
+    }
 }
 
 // Disable bootJar since common is not an executable Spring Boot application
