@@ -48,7 +48,7 @@ public record CustomUserDetails(Account account) implements UserDetails {
 
   @Override
   public boolean isAccountNonLocked() {
-    return true;
+    return account.getStatus() != AccountStatus.SUSPENDED;
   }
 
   @Override
@@ -58,6 +58,7 @@ public record CustomUserDetails(Account account) implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return account.getStatus() == AccountStatus.PENDING;
+    return !account.getIsDelete()
+            && account.getStatus() != AccountStatus.INACTIVE;
   }
 }

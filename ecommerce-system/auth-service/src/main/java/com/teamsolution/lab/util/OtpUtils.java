@@ -13,7 +13,7 @@ public class OtpUtils {
       byte[] encodedhash = digest.digest(otp.getBytes(StandardCharsets.UTF_8));
       return bytesToHex(encodedhash);
     } catch (Exception e) {
-      throw new RuntimeException("Failed to hash OTP", e);
+      throw new IllegalStateException("Failed to hash OTP", e);
     }
   }
 

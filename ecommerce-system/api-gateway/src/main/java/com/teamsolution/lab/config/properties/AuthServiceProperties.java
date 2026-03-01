@@ -10,5 +10,6 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class AuthServiceProperties {
+  private String jwksUri;
   private String googleLoginUri;
 }

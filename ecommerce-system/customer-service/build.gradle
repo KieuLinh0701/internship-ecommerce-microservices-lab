@@ -31,6 +31,9 @@ dependencies {
     // Common module: Shared utilities and models
     implementation project(':common')
 
+    // OpenAPI/Swagger for automatic API documentation generation
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
     // Spring Boot DevTools: Provides hot reload and developer-friendly features
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 

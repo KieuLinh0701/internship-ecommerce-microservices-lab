@@ -9,8 +9,10 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
     info =
         @Info(
-            title = "TeamSolution E-Commerce API",
+            title = "Auth Service API",
             version = "v1.0",
-            description = "API documentation for internship microservices project"),
-    servers = {@Server(url = "http://localhost:9001", description = "Local")})
+            description = "Authentication and authorization"),
+    servers = {
+            @Server(url = "http://localhost:9000/api/auth", description = "Gateway - Local")
+    })
 public class OpenApiConfig {}

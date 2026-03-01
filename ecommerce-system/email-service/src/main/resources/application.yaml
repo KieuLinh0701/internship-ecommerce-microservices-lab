@@ -29,6 +29,12 @@ spring:
         jwt:
           jwk-set-uri: http://localhost:9001/oauth2/jwks
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
 eureka:
   client:
     service-url:
@@ -45,3 +51,8 @@ logging:
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+rabbitmq:
+  queue: email.queue
+  exchange: user.exchange
+  routing-key: user.registered

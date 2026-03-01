@@ -3,6 +3,8 @@ package com.teamsolution.lab.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -29,8 +31,16 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
       throw new BadCredentialsException("Invalid password");
     }
 
+    if (!userDetails.isEnabled()) {
+      throw new DisabledException("Account is disabled or deleted");
+    }
+
+    if (!userDetails.isAccountNonLocked()) {
+      throw new LockedException("Account is suspended");
+    }
+
     return new UsernamePasswordAuthenticationToken(
-        userDetails, password, userDetails.getAuthorities());
+            userDetails, password, userDetails.getAuthorities());
   }
 
   @Override

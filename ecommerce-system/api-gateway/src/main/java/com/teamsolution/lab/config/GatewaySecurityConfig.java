@@ -1,7 +1,9 @@
 package com.teamsolution.lab.config;
 
+import com.teamsolution.lab.config.properties.AuthServiceProperties;
 import com.teamsolution.lab.security.GoogleOAuth2SuccessHandler;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -10,13 +12,14 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 @EnableWebFluxSecurity
+@RequiredArgsConstructor
 public class GatewaySecurityConfig {
 
-  @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
-  private String jwkSetUri;
+  private final AuthServiceProperties authServiceProperties;
 
   @Bean
   public SecurityWebFilterChain springSecurityFilterChain(
@@ -26,18 +29,21 @@ public class GatewaySecurityConfig {
             exchanges ->
                 exchanges
                     // Public endpoints
-                    .pathMatchers("/api/auth/**")
-                    .permitAll()
-                    .pathMatchers("/login/oauth2/code/**")
-                    .permitAll()
-                    .pathMatchers("/oauth2/**")
-                    .permitAll()
+                        .pathMatchers("/api/auth/**").permitAll()
+                        .pathMatchers("/login/oauth2/code/**").permitAll()
+                        .pathMatchers("/oauth2/**").permitAll()
+                        .pathMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/webjars/**",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs"
+                        ).permitAll()
 
-                    // All other requests need
-                    .anyExchange()
-                    .authenticated())
-        .oauth2Login(Customizer.withDefaults())
-        .oauth2Login(oauth2 -> oauth2.authenticationSuccessHandler(successHandler));
+                      // All other requests need
+                      .anyExchange().authenticated())
+            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+            .oauth2Login(oauth2 -> oauth2.authenticationSuccessHandler(successHandler));
 
     // CORS configuration for the frontend UI
     //        http.cors(cors -> cors.configurationSource(request -> {
@@ -51,7 +57,12 @@ public class GatewaySecurityConfig {
   }
 
   @Bean
-  public ReactiveJwtDecoder reactiveJwtDecoder() {
-    return NimbusReactiveJwtDecoder.withJwkSetUri(jwkSetUri).build();
+  public ReactiveJwtDecoder reactiveJwtDecoder(@LoadBalanced WebClient.Builder webClientBuilder) {
+    WebClient webClient = webClientBuilder.build();
+
+    return NimbusReactiveJwtDecoder
+            .withJwkSetUri(authServiceProperties.getJwksUri())
+            .webClient(webClient)
+            .build();
   }
 }
