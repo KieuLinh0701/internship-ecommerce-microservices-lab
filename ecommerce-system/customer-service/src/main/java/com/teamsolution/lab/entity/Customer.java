@@ -6,15 +6,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "customers")
@@ -25,11 +26,17 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Customer extends BaseEntity {
 
-  @Column(name = "account_id", nullable = false)
+  @Column(name = "account_id")
   private UUID accountId;
 
-  @Column(name = "full_name", nullable = false)
+  @Column(name = "full_name")
   private String fullName;
+
+  @Column(name = "phone")
+  private String phone;
+
+  @Column(name = "avatar_url ")
+  private String avatarUrl ;
 
   @OneToMany(
       mappedBy = "customer",

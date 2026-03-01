@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -36,6 +37,7 @@ public class Account extends BaseEntity {
   @Builder.Default
   private AccountStatus status = AccountStatus.PENDING;
 
+  @Builder.Default
   @OneToMany(mappedBy = "account")
-  private Set<AccountRole> accountRoles;
+  private Set<AccountRole> accountRoles = new HashSet<>();
 }

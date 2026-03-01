@@ -1,31 +1,29 @@
 package com.teamsolution.lab.service.impl;
 
-import com.teamsolution.lab.config.properties.JwtProperties;
 import com.teamsolution.lab.dto.request.GoogleLoginRequest;
 import com.teamsolution.lab.dto.request.LoginRequest;
 import com.teamsolution.lab.dto.request.RefreshRequest;
 import com.teamsolution.lab.dto.request.RegisterRequest;
+import com.teamsolution.lab.dto.request.SwitchRoleRequest;
 import com.teamsolution.lab.dto.request.VerifyEmailRequest;
 import com.teamsolution.lab.dto.response.AuthResponse;
-import com.teamsolution.lab.dto.response.EmailResponse;
+import com.teamsolution.lab.dto.response.CustomerProfileGrpcResponse;
 import com.teamsolution.lab.dto.response.LoginResponse;
-import com.teamsolution.lab.dto.response.PendingLoginResponse;
+import com.teamsolution.lab.dto.response.ProfileResponse;
 import com.teamsolution.lab.dto.response.RegisterResponse;
 import com.teamsolution.lab.entity.Account;
 import com.teamsolution.lab.entity.RefreshToken;
-import com.teamsolution.lab.enums.AccountRoleStatus;
 import com.teamsolution.lab.enums.AccountStatus;
-import com.teamsolution.lab.enums.RoleStatus;
-import com.teamsolution.lab.exception.DuplicateResourceException;
-import com.teamsolution.lab.exception.ResourceNotFoundException;
-import com.teamsolution.lab.grpc.EmailGrpcClient;
-import com.teamsolution.lab.repository.AccountRepository;
-import com.teamsolution.lab.repository.RefreshTokenRepository;
+import com.teamsolution.lab.exception.InvalidAccountStatusException;
+import com.teamsolution.lab.exception.InvalidTokenException;
+import com.teamsolution.lab.grpc.CustomerGrpcClient;
 import com.teamsolution.lab.security.CustomUserDetails;
 import com.teamsolution.lab.service.AuthService;
-import com.teamsolution.lab.service.JwtTokenService;
+import com.teamsolution.lab.service.helper.AccountService;
 import com.teamsolution.lab.service.helper.AuthHelperService;
-import com.teamsolution.lab.util.OtpUtils;
+import com.teamsolution.lab.service.helper.JwtTokenService;
+import com.teamsolution.lab.service.helper.NotificationService;
+import com.teamsolution.lab.service.helper.RefreshTokenService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,7 +32,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -42,36 +40,26 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
-    private final EmailGrpcClient emailGrpcClient;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtProperties jwtProperties;
     private final AuthHelperService authHelperService;
+    private final RefreshTokenService refreshTokenService;
+    private final NotificationService notificationService;
+    private final AccountService accountService;
+    private final CustomerGrpcClient customerGrpcClient;
 
     // login
     @Override
     @Transactional
     public LoginResponse login(LoginRequest request) {
-        Authentication auth =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(request.email(), request.password()));
-
-        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+        CustomUserDetails userDetails = authenticate(request.email(), request.password());
 
         Account account = userDetails.account();
 
-        if (account.getIsDelete()) {
-            throw new RuntimeException("Account is deleted");
-        }
-
         return switch (account.getStatus()) {
-            case AccountStatus.PENDING -> loginPendingAccount(account);
-            case AccountStatus.ACTIVE -> loginValidAccount(request.email());
-            case INACTIVE -> throw new RuntimeException("Account is inactive");
-            case SUSPENDED -> throw new RuntimeException("Account is suspended");
-            default -> throw new RuntimeException("Unknown account status: " + account.getStatus());
+            case AccountStatus.PENDING -> authHelperService.handlePendingLogin(account);
+            case AccountStatus.ACTIVE -> issueTokensAndSave(request.email(), null);
+            default -> throw new InvalidAccountStatusException("Unknown account status: " + account.getStatus());
         };
     }
 
@@ -79,50 +67,38 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
-        accountRepository
-                .findByEmail(request.email())
-                .orElseGet(
-                        () -> authHelperService.createGoogleAccount(request.email())
-                );
+        accountService.findOrCreateGoogleAccount(
+                request.email(),
+                request.name(),
+                request.picture());
 
-        Account account = accountRepository.findByEmailWithActiveRoles(
-                    request.email(),
-                    AccountStatus.ACTIVE,
-                    AccountRoleStatus.ACTIVE,
-                    RoleStatus.ACTIVE
-                )
-                .orElseThrow();
-
-        AuthResponse tokens = jwtTokenService.generateTokens(account);
-        saveRefreshToken(account, tokens.refreshToken());
-
-        return tokens;
+        return issueTokensAndSave(request.email(), null);
     }
 
     // register
     @Override
     public RegisterResponse register(RegisterRequest request) {
-        // Check if email already exists
-        if (accountRepository.existsByEmail(request.email())) {
-            throw new DuplicateResourceException("Email already exists");
-        }
+        accountService.checkEmailNotExists(request.email());
 
         String rawOtp = authHelperService.createPendingAccount(
                 request.email(),
-                passwordEncoder.encode(request.password()));
+                passwordEncoder.encode(request.password()),
+                request.fullName(),
+                request.phone());
 
-        return sendVerificationEmail(request.email(), rawOtp);
+        notificationService.sendVerificationEmail(request.email(), rawOtp);
+
+        return new RegisterResponse(
+                request.email(),
+                15*60
+        );
     }
 
     @Override
     @Transactional
     public void verifyEmail(VerifyEmailRequest request) {
-
         // find account by email
-        Account account =
-                accountRepository
-                        .findByEmail(request.email())
-                        .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+        Account account = accountService.findByEmail(request.email());
 
         authHelperService.activatePendingAccount(account.getId(), request.otp());
     }
@@ -130,81 +106,62 @@ public class AuthServiceImpl implements AuthService {
     // Refresh token
     @Override
     @Transactional
-    public AuthResponse refresh(RefreshRequest request) {
-        String hashedToken = OtpUtils.hashOtp(request.refreshToken());
+    public AuthResponse refresh(String currentRole, RefreshRequest request) {
+        RefreshToken storedToken = refreshTokenService.validateAndGet(request.refreshToken());
 
-        RefreshToken storedToken = refreshTokenRepository
-                .findByTokenAndIsUsedFalse(hashedToken)
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid or used refresh token"));
-
-        if (storedToken.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Refresh token expired"); // modify later to custom exception
-        }
-
-        UUID accountIdFromJwt = UUID.fromString(
-                jwtTokenService.extractSubject(request.refreshToken())
-        );
-
-        if (!storedToken.getAccount().getId().equals(accountIdFromJwt)) {
-            throw new RuntimeException("Token mismatch"); // modify later to custom exception
-        }
+        verifyTokenOwnerShip(storedToken, request.refreshToken());
 
         storedToken.setUsed(true);
 
-        Account account = accountRepository.findByEmailWithActiveRoles(
-                storedToken.getAccount().getEmail(),
-                AccountStatus.ACTIVE,
-                AccountRoleStatus.ACTIVE,
-                RoleStatus.ACTIVE
-        ).orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+        return issueTokensAndSave(storedToken.getAccount().getEmail(), currentRole);
+    }
 
-        AuthResponse tokens = jwtTokenService.generateTokens(account);
-        saveRefreshToken(account, tokens.refreshToken());
+    @Override
+    public ProfileResponse getMe(UUID accountId) {
+        Account account = accountService.findById(accountId);
+
+        Set<String> roles = accountService.getActiveRoleNamesByAccountId(accountId);
+
+        CustomerProfileGrpcResponse customerProfileResponse =
+                customerGrpcClient.getCustomerProfile(account.getId());
+
+        return new ProfileResponse(
+                account.getId(),
+                account.getEmail(),
+                customerProfileResponse.fullName(),
+                customerProfileResponse.phone(),
+                customerProfileResponse.avatarUrl(),
+                account.getStatus(),
+                roles
+                );
+    }
+
+    @Override
+    public AuthResponse switchRole(UUID accountId, SwitchRoleRequest request) {
+        return issueTokensAndSave(accountService.findById(accountId).getEmail(), request.role());
+    }
+
+    private CustomUserDetails authenticate(String email, String password) {
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password));
+        return (CustomUserDetails) auth.getPrincipal();
+    }
+
+    private AuthResponse issueTokensAndSave(String email, String selectedRole) {
+        Account account = accountService.getAccountWithActiveRoles(email);
+
+        AuthResponse tokens = jwtTokenService.generateTokens(account, selectedRole);
+        refreshTokenService.save(account, tokens.refreshToken());
         return tokens;
     }
 
-    private void saveRefreshToken(Account account, String rawRefreshToken) {
-        String hashedToken = OtpUtils.hashOtp(rawRefreshToken);
-        RefreshToken refreshToken = RefreshToken.builder()
-                .account(account)
-                .token(hashedToken)
-                .isUsed(false)
-                .expiresAt(LocalDateTime.now().plusSeconds(jwtProperties.getRefreshTokenExpiration()))
-                .build();
-        refreshTokenRepository.save(refreshToken);
-    }
+    private void verifyTokenOwnerShip(RefreshToken storedToken, String rawRefreshToken) {
+        UUID accountIdFromJwt = UUID.fromString(
+                jwtTokenService.extractSubject(rawRefreshToken)
+        );
 
-    private PendingLoginResponse loginPendingAccount(Account account) {
-
-        String rawOtp = authHelperService.resendOtp(account.getId(), account);
-
-        sendVerificationEmail(account.getEmail(), rawOtp);
-        return new PendingLoginResponse(account.getEmail(), 15 * 60);
-    }
-
-    private AuthResponse loginValidAccount(String email) {
-        Account accountWithRoles = accountRepository.findByEmailWithActiveRoles(
-                        email,
-                        AccountStatus.ACTIVE,
-                        AccountRoleStatus.ACTIVE,
-                        RoleStatus.ACTIVE
-                )
-                .orElseThrow();
-
-        AuthResponse tokens = jwtTokenService.generateTokens(accountWithRoles);
-        saveRefreshToken(accountWithRoles, tokens.refreshToken());
-
-        return tokens;
-    }
-
-    // Send verification email for registration or unverified login
-    private RegisterResponse sendVerificationEmail(String email, String rawOtp) {
-        EmailResponse response = emailGrpcClient.sendVerificationEmail(
-                email,
-                "Thank you for registering with us!",
-                "Your verification otp: " + rawOtp);
-        return response.success()
-                ? new RegisterResponse(email, 15 * 60)
-                : new RegisterResponse(null, 0);
+        if (!storedToken.getAccount().getId().equals(accountIdFromJwt)) {
+            throw new InvalidTokenException("Token mismatch");
+        }
     }
 }

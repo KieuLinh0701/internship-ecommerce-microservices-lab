@@ -66,11 +66,58 @@ spring:
           filters:
             - RewritePath=/api/notifications/(?<segment>.*), /$\{segment}
 
+        # Swagger doc routes for each service
+        - id: auth-service-docs
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/v3/api-docs
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /$\{segment}
+
+        - id: customer-service-docs
+          uri: lb://customer-service
+          predicates:
+            - Path=/api/customers/v3/api-docs
+          filters:
+            - RewritePath=/api/customers/(?<segment>.*), /$\{segment}
+
+        - id: cart-service-docs
+          uri: lb://cart-service
+          predicates:
+            - Path=/api/cart/v3/api-docs
+          filters:
+            - RewritePath=/api/cart/(?<segment>.*), /$\{segment}
+
+        - id: order-service-docs
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/v3/api-docs
+          filters:
+            - RewritePath=/api/orders/(?<segment>.*), /$\{segment}
+
+        - id: payment-service-docs
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/v3/api-docs
+          filters:
+            - RewritePath=/api/payments/(?<segment>.*), /$\{segment}
+
+        - id: inventory-service-docs
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/inventory/v3/api-docs
+          filters:
+            - RewritePath=/api/inventory/(?<segment>.*), /$\{segment}
+
+        - id: notification-service-docs
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/v3/api-docs
+          filters:
+            - RewritePath=/api/notifications/(?<segment>.*), /$\{segment}
+
   security:
     oauth2:
-      resource-server:
-        jwt:
-          jwk-set-uri: http://localhost:9001/oauth2/jwks
       client:
         registration:
           google:
@@ -80,6 +127,24 @@ spring:
               - email
               - profile
             redirect-uri: http://localhost:9000/login/oauth2/code/google
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: auth-service
+        url: /api/auth/v3/api-docs
+      - name: customer-service
+        url: /api/customers/v3/api-docs
+      - name: cart-service
+        url: /api/cart/v3/api-docs
+      - name: order-service
+        url: /api/orders/v3/api-docs
+      - name: payment-service
+        url: /api/payments/v3/api-docs
+      - name: inventory-service
+        url: /api/inventory/v3/api-docs
+      - name: notification-service
+        url: /api/notifications/v3/api-docs
 
 eureka:
   client:
@@ -92,4 +157,5 @@ logging:
 
 app:
   auth-service:
+    jwks-uri: http://auth-service/jwks
     google-login-uri: lb://auth-service/oauth2/google

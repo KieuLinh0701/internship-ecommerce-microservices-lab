@@ -42,6 +42,15 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // Provides RabbitMQ integration using AMQP protocol (message queues, producers, consumers, listeners)
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
+    // MapStruct: Code generator for mapping between Java bean types
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+
+    // Lombok + MapStruct binding
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
     // PostgreSQL driver for database connectivity
     runtimeOnly 'org.postgresql:postgresql'
 

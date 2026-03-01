@@ -6,7 +6,8 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.teamsolution.lab.config.properties.JwtProperties;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -21,45 +22,52 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 
-@Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class JwtConfig {
 
   private final JwtProperties jwtProperties;
 
-  public JwtConfig(JwtProperties jwtProperties) {
-    this.jwtProperties = jwtProperties;
+  private RSAPublicKey rsaPublicKey;
+  private RSAPrivateKey rsaPrivateKey;
+
+  // Parses and caches RSA key pair from config on application startup
+  @PostConstruct
+  public void init() throws Exception {
+    this.rsaPublicKey = loadPublicKey(jwtProperties.getPublicKey());
+    this.rsaPrivateKey = loadPrivateKey(jwtProperties.getPrivateKey());
   }
 
-  // JWK Source - RSA Public/Private Key Pair
   @Bean
-  public JWKSource<SecurityContext> jwkSource() throws Exception {
-
-    RSAPublicKey publicKey = loadPublicKey(jwtProperties.getPublicKey());
-    RSAPrivateKey privateKey = loadPrivateKey(jwtProperties.getPrivateKey());
-
-    RSAKey rsaKey =
-        new RSAKey.Builder(publicKey)
-            .privateKey(privateKey)
+  public JWKSet jwkSet() {
+    RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
             .keyID(jwtProperties.getKeyId())
             .build();
-
-    JWKSet jwkSet = new JWKSet(rsaKey);
-    return new ImmutableJWKSet<>(jwkSet);
+    return new JWKSet(rsaKey);
   }
 
-  // JwtConfig.java — thêm bean này vào
+  @Bean
+  public JWKSource<SecurityContext> jwkSource() {
+    RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
+            .privateKey(rsaPrivateKey)
+            .keyID(jwtProperties.getKeyId())
+            .build();
+    return new ImmutableJWKSet<>(new JWKSet(rsaKey));
+  }
+
+  // Creates a JWT encoder that signs tokens using the RSA private key
   @Bean
   public JwtEncoder jwtEncoder() throws Exception {
     return new NimbusJwtEncoder(jwkSource());
   }
 
+  // Creates a JWT decoder that verifies token signatures using the RSA public key
   @Bean
   public JwtDecoder jwtDecoder() throws Exception {
-    return NimbusJwtDecoder.withPublicKey(loadPublicKey(jwtProperties.getPublicKey())).build();
+    return NimbusJwtDecoder.withPublicKey(rsaPublicKey).build();
   }
 
-  // Load RSA public key from Base64 string
+  // Decodes a Base64-encoded public key string into an RSAPublicKey object
   private RSAPublicKey loadPublicKey(String key) throws Exception {
     String cleanKey = key.replaceAll("\\s+", "");
 
@@ -69,7 +77,7 @@ public class JwtConfig {
     return (RSAPublicKey) kf.generatePublic(spec);
   }
 
-  // Load RSA private key from Base64 string
+  // Decodes a Base64-encoded private key string into an RSAPrivateKey object
   private RSAPrivateKey loadPrivateKey(String key) throws Exception {
     String cleanKey = key.replaceAll("\\s+", "");
 
