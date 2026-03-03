@@ -7,6 +7,12 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.teamsolution.lab.config.properties.JwtProperties;
 import jakarta.annotation.PostConstruct;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,13 +20,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-
-import java.security.KeyFactory;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 
 @Configuration
 @RequiredArgsConstructor
@@ -40,15 +39,14 @@ public class JwtConfig {
 
   @Bean
   public JWKSet jwkSet() {
-    RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
-            .keyID(jwtProperties.getKeyId())
-            .build();
+    RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey).keyID(jwtProperties.getKeyId()).build();
     return new JWKSet(rsaKey);
   }
 
   @Bean
   public JWKSource<SecurityContext> jwkSource() {
-    RSAKey rsaKey = new RSAKey.Builder(rsaPublicKey)
+    RSAKey rsaKey =
+        new RSAKey.Builder(rsaPublicKey)
             .privateKey(rsaPrivateKey)
             .keyID(jwtProperties.getKeyId())
             .build();

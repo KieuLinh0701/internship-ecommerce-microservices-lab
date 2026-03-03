@@ -6,6 +6,8 @@ import com.teamsolution.lab.entity.Account;
 import com.teamsolution.lab.enums.SystemRole;
 import com.teamsolution.lab.exception.NoRecordsFoundException;
 import com.teamsolution.lab.exception.RoleNotFoundException;
+import java.time.Instant;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -14,9 +16,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -40,9 +39,7 @@ public class JwtTokenService {
     if (selectedRole == null || selectedRole.isBlank()) {
       String defaultRole = SystemRole.CUSTOMER.name();
 
-       currentRole = roles.contains(defaultRole)
-              ? defaultRole
-              : roles.iterator().next();
+      currentRole = roles.contains(defaultRole) ? defaultRole : roles.iterator().next();
     } else {
       if (!roles.contains(selectedRole)) {
         throw new RoleNotFoundException("Invalid role selected");
@@ -51,18 +48,17 @@ public class JwtTokenService {
       currentRole = selectedRole;
     }
 
-
     JwtClaimsSet accessClaims =
         JwtClaimsSet.builder()
-                .issuer(jwtProperties.getIssuer())
-                .subject(account.getId().toString())
-                .issuedAt(now)
-                .expiresAt(now.plusSeconds(jwtProperties.getAccessTokenExpiration()))
-                .claim("account_id", account.getId().toString())
-                .claim("email", account.getEmail())
-                .claim("roles", roles)
-                .claim("current_role", currentRole)
-                .build();
+            .issuer(jwtProperties.getIssuer())
+            .subject(account.getId().toString())
+            .issuedAt(now)
+            .expiresAt(now.plusSeconds(jwtProperties.getAccessTokenExpiration()))
+            .claim("account_id", account.getId().toString())
+            .claim("email", account.getEmail())
+            .claim("roles", roles)
+            .claim("current_role", currentRole)
+            .build();
 
     JwtClaimsSet refreshClaims =
         JwtClaimsSet.builder()
@@ -81,6 +77,38 @@ public class JwtTokenService {
         jwtEncoder.encode(JwtEncoderParameters.from(header, refreshClaims)).getTokenValue();
 
     return new AuthResponse(accessToken, refreshToken);
+  }
+
+  public String generateToken(Account account, String type, long expirationMinutes) {
+    Instant now = Instant.now();
+    Instant expiry = now.plusSeconds(expirationMinutes * 60);
+
+    JwtClaimsSet claims =
+        JwtClaimsSet.builder()
+            .issuer(jwtProperties.getIssuer())
+            .subject(account.getId().toString())
+            .issuedAt(now)
+            .expiresAt(expiry)
+            .claim("email", account.getEmail())
+            .claim("type", type)
+            .build();
+
+    JwsHeader header = JwsHeader.with(SignatureAlgorithm.RS256).build();
+
+    return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+  }
+
+  public String extractEmail(String token) {
+    return jwtDecoder.decode(token).getClaim("email");
+  }
+
+  public String extractTokenType(String token) {
+    return jwtDecoder.decode(token).getClaim("type");
+  }
+
+  public boolean isTokenExpired(String token) {
+    Instant expiry = jwtDecoder.decode(token).getExpiresAt();
+    return expiry == null || expiry.isBefore(Instant.now());
   }
 
   public String extractSubject(String token) {

@@ -6,8 +6,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(
-        componentModel = "spring",
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface RoleMapper extends BaseMapper<Role, RoleDto> {
-
-}
+    componentModel = "spring",
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+public interface RoleMapper extends BaseMapper<Role, RoleDto> {}

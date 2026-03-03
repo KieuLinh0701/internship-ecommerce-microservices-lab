@@ -17,9 +17,12 @@ public class EmailService {
   public void sendWelcomeEmail(UserRegisteredEvent event) {
     try {
       String subject = "Mã OTP xác thực tài khoản";
-      String body = "Mã OTP của bạn là: " + event.getRawOtp() + "\n\n" +
-              "Mã có hiệu lực trong 5 phút.\n" +
-              "Vui lòng không chia sẻ mã này cho người khác.";
+      String body =
+          "Mã OTP của bạn là: "
+              + event.getRawOtp()
+              + "\n\n"
+              + "Mã có hiệu lực trong 5 phút.\n"
+              + "Vui lòng không chia sẻ mã này cho người khác.";
 
       SimpleMailMessage message = new SimpleMailMessage();
       message.setTo(event.getEmail());

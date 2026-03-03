@@ -1,13 +1,15 @@
 package com.teamsolution.lab.service.impl;
 
 import com.teamsolution.lab.dto.CustomerDto;
+import com.teamsolution.lab.dto.request.UpdateCustomerRequest;
 import com.teamsolution.lab.entity.Customer;
 import com.teamsolution.lab.exception.ResourceNotFoundException;
 import com.teamsolution.lab.mapper.CustomerMapper;
 import com.teamsolution.lab.repository.CustomerRepository;
 import com.teamsolution.lab.service.CustomerService;
-import java.util.UUID;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class CustomerServiceImpl extends BaseServiceImpl<Customer, CustomerDto, UUID>
@@ -24,12 +26,28 @@ public class CustomerServiceImpl extends BaseServiceImpl<Customer, CustomerDto, 
 
   @Override
   public CustomerDto getByAccountId(UUID accountId) {
-    Customer entity =
-        customerRepository
-            .findByAccountId(accountId)
-            .orElseThrow(
-                () -> new ResourceNotFoundException("Account not found with id: " + accountId));
+    Customer entity = findByAccountId(accountId);
 
     return customerMapper.toDto(entity);
+  }
+
+  @Override
+  public CustomerDto updateByAccountId(UUID accountId, UpdateCustomerRequest request) {
+    Customer customer = findByAccountId(accountId);
+
+    customer.setFullName(request.getFullName());
+    customer.setPhone(request.getPhone());
+    customer.setAvatarUrl(request.getAvatarUrl());
+
+    customerRepository.save(customer);
+
+    return customerMapper.toDto(customer);
+  }
+
+  public Customer findByAccountId(UUID accountId) {
+    return  customerRepository
+                    .findByAccountId(accountId)
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException("Customer not found with id: " + accountId));
   }
 }

@@ -1,4 +1,3 @@
 package com.teamsolution.lab.dto.response;
 
-public sealed interface LoginResponse permits AuthResponse, PendingLoginResponse {
-}
+public sealed interface LoginResponse permits AuthResponse, PendingLoginResponse {}

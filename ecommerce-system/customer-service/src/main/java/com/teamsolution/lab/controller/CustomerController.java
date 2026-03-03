@@ -1,15 +1,19 @@
 package com.teamsolution.lab.controller;
 
 import com.teamsolution.lab.dto.CustomerDto;
+import com.teamsolution.lab.dto.request.UpdateCustomerRequest;
 import com.teamsolution.lab.response.ApiResponse;
 import com.teamsolution.lab.service.CustomerService;
-import java.util.UUID;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/me")
@@ -23,16 +27,18 @@ public class CustomerController extends BaseController<CustomerDto, UUID> {
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<CustomerDto>> getMe(@AuthenticationPrincipal Jwt jwt) {
+  public ResponseEntity<ApiResponse<CustomerDto>> getMe(
+          @RequestHeader("X-Account-id") String accountId
+  ) {
 
-    String id = jwt.getClaim("account_id");
-    UUID accountId = UUID.fromString(id);
-
-    return ResponseEntity.ok(ApiResponse.success(customerService.getByAccountId(accountId)));
+    return ResponseEntity.ok(ApiResponse.success(customerService.getByAccountId(UUID.fromString(accountId))));
   }
 
-  @GetMapping("/test")
-  public ResponseEntity<ApiResponse<String>> test() {
-    return ResponseEntity.ok(ApiResponse.success("Hi, this is a test endpoint!"));
+  @PutMapping
+  public ResponseEntity<ApiResponse<CustomerDto>> updateMe(
+          @RequestHeader("X-Account-id") String accountId,
+          @Valid @RequestBody UpdateCustomerRequest request
+  ) {
+    return ResponseEntity.ok(ApiResponse.success(customerService.updateByAccountId(UUID.fromString(accountId), request)));
   }
 }
