@@ -1,15 +1,21 @@
 package com.teamsolution.lab.controller;
 
+import com.teamsolution.lab.dto.request.ChangePasswordRequest;
 import com.teamsolution.lab.dto.request.GoogleLoginRequest;
 import com.teamsolution.lab.dto.request.LoginRequest;
 import com.teamsolution.lab.dto.request.RefreshRequest;
 import com.teamsolution.lab.dto.request.RegisterRequest;
+import com.teamsolution.lab.dto.request.ResetPasswordRequest;
+import com.teamsolution.lab.dto.request.SendOtpResetPasswordRequest;
 import com.teamsolution.lab.dto.request.SwitchRoleRequest;
 import com.teamsolution.lab.dto.request.VerifyEmailRequest;
+import com.teamsolution.lab.dto.request.VerifyPasswordResetRequest;
 import com.teamsolution.lab.dto.response.AuthResponse;
 import com.teamsolution.lab.dto.response.LoginResponse;
 import com.teamsolution.lab.dto.response.ProfileResponse;
 import com.teamsolution.lab.dto.response.RegisterResponse;
+import com.teamsolution.lab.dto.response.SendOtpResetPasswordResponse;
+import com.teamsolution.lab.dto.response.VerifyPasswordResetResponse;
 import com.teamsolution.lab.exception.SameRoleException;
 import com.teamsolution.lab.response.ApiResponse;
 import com.teamsolution.lab.service.AuthService;
@@ -34,7 +40,8 @@ public class AuthController {
 
   // Login
   @PostMapping("/login")
-  public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+  public ResponseEntity<ApiResponse<LoginResponse>> login(
+      @Valid @RequestBody LoginRequest request) {
     return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
   }
 
@@ -49,7 +56,10 @@ public class AuthController {
   @PostMapping("/register")
   public ResponseEntity<ApiResponse<RegisterResponse>> register(
       @Valid @RequestBody RegisterRequest request) {
-    return ResponseEntity.ok(ApiResponse.success("Registration was successful. Please check your email to verify your account.", authService.register(request)));
+    return ResponseEntity.ok(
+        ApiResponse.success(
+            "Registration was successful. Please check your email to verify your account.",
+            authService.register(request)));
   }
 
   @PostMapping("/verify-email")
@@ -62,14 +72,13 @@ public class AuthController {
   // Refresh token
   @PostMapping("/refresh")
   public ResponseEntity<ApiResponse<AuthResponse>> refresh(
-          @RequestHeader("X-Role") String currentRole,
-          @RequestBody RefreshRequest request) {
+      @RequestHeader("X-Role") String currentRole, @RequestBody RefreshRequest request) {
     return ResponseEntity.ok(ApiResponse.success(authService.refresh(currentRole, request)));
   }
 
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<ProfileResponse>> getMe(
-          @RequestHeader("X-Account-Id") String accountId) {
+      @RequestHeader("X-Account-Id") String accountId) {
 
     ProfileResponse profileResponse = authService.getMe(UUID.fromString(accountId));
     return ResponseEntity.ok(ApiResponse.success(profileResponse));
@@ -77,9 +86,9 @@ public class AuthController {
 
   @PostMapping("/switch-role")
   public ResponseEntity<ApiResponse<AuthResponse>> switchRole(
-          @RequestHeader("X-Account-Id") String accountId,
-          @RequestHeader("X-Role") String currentRole,
-          @Valid @RequestBody SwitchRoleRequest request) {
+      @RequestHeader("X-Account-Id") String accountId,
+      @RequestHeader("X-Role") String currentRole,
+      @Valid @RequestBody SwitchRoleRequest request) {
 
     if (currentRole.equals(request.role())) {
       throw new SameRoleException("Already using this role");
@@ -89,4 +98,36 @@ public class AuthController {
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
+  @PostMapping("/password-reset/send-otp")
+  public ResponseEntity<ApiResponse<SendOtpResetPasswordResponse>> sendOtpResetPassword(
+      @Valid @RequestBody SendOtpResetPasswordRequest request) {
+
+    SendOtpResetPasswordResponse response = authService.sendOtpResetPassword(request);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @PostMapping("/password-reset/verify")
+  public ResponseEntity<ApiResponse<VerifyPasswordResetResponse>> verifyPasswordReset(
+      @Valid @RequestBody VerifyPasswordResetRequest request) {
+
+    VerifyPasswordResetResponse response = authService.verifyResetPassword(request);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @PostMapping("/password-reset/reset")
+  public ResponseEntity<ApiResponse<Void>> resetPassword(
+      @Valid @RequestBody ResetPasswordRequest request) {
+
+    authService.resetPassword(request);
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
+  @PostMapping("/change-password")
+  public ResponseEntity<ApiResponse<Void>> changePassword(
+      @RequestHeader("X-Account-Id") String accountId,
+      @Valid @RequestBody ChangePasswordRequest request) {
+
+    authService.changePassword(UUID.fromString(accountId), request);
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
 }

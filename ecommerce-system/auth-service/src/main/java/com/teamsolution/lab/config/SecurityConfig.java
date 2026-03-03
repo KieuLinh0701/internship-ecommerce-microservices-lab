@@ -21,23 +21,18 @@ public class SecurityConfig {
   @Order(2)
   public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
-          .authorizeHttpRequests(
-              authorize ->
-                  authorize
-                          .requestMatchers("/register",
-                                  "/login",
-                                  "/refresh",
-                                  "/verify-email",
-                                  "/jwks"
-                          ).permitAll()
-                          .requestMatchers(
-                                  "/swagger-ui/**",
-                                  "/swagger-ui.html",
-                                  "/v3/api-docs/**",
-                                  "/v3/api-docs"
-                          ).permitAll()
-                          .requestMatchers("/oauth2/google").permitAll()
-                          .anyRequest().permitAll());
+        .authorizeHttpRequests(
+            authorize ->
+                authorize
+                    .requestMatchers("/register", "/login", "/refresh", "/verify-email", "/jwks")
+                    .permitAll()
+                    .requestMatchers(
+                        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs")
+                    .permitAll()
+                    .requestMatchers("/oauth2/google")
+                    .permitAll()
+                    .anyRequest()
+                    .permitAll());
 
     return http.build();
   }
@@ -48,7 +43,8 @@ public class SecurityConfig {
   }
 
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+  public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+      throws Exception {
     return config.getAuthenticationManager();
   }
 }

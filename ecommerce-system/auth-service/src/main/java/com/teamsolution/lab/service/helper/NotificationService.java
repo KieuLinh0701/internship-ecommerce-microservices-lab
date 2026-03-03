@@ -10,17 +10,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationService {
 
-    private final AmqpTemplate amqpTemplate;
-    private final RabbitMQProperties rabbitMQProperties;
+  private final AmqpTemplate amqpTemplate;
+  private final RabbitMQProperties rabbitMQProperties;
 
-    public void sendVerificationEmail(String email, String rawOtp) {
-        UserRegisteredEvent event = UserRegisteredEvent.builder()
-                .email(email)
-                .rawOtp(rawOtp)
-                .build();
-        amqpTemplate.convertAndSend(
-                rabbitMQProperties.getExchange(),
-                rabbitMQProperties.getRoutingKey(), event
-        );
-    }
+  public void sendVerificationEmail(String email, String rawOtp) {
+    UserRegisteredEvent event = UserRegisteredEvent.builder().email(email).rawOtp(rawOtp).build();
+    amqpTemplate.convertAndSend(
+        rabbitMQProperties.getExchange(), rabbitMQProperties.getRoutingKey(), event);
+  }
 }

@@ -66,56 +66,6 @@ spring:
           filters:
             - RewritePath=/api/notifications/(?<segment>.*), /$\{segment}
 
-        # Swagger doc routes for each service
-        - id: auth-service-docs
-          uri: lb://auth-service
-          predicates:
-            - Path=/api/auth/v3/api-docs
-          filters:
-            - RewritePath=/api/auth/(?<segment>.*), /$\{segment}
-
-        - id: customer-service-docs
-          uri: lb://customer-service
-          predicates:
-            - Path=/api/customers/v3/api-docs
-          filters:
-            - RewritePath=/api/customers/(?<segment>.*), /$\{segment}
-
-        - id: cart-service-docs
-          uri: lb://cart-service
-          predicates:
-            - Path=/api/cart/v3/api-docs
-          filters:
-            - RewritePath=/api/cart/(?<segment>.*), /$\{segment}
-
-        - id: order-service-docs
-          uri: lb://order-service
-          predicates:
-            - Path=/api/orders/v3/api-docs
-          filters:
-            - RewritePath=/api/orders/(?<segment>.*), /$\{segment}
-
-        - id: payment-service-docs
-          uri: lb://payment-service
-          predicates:
-            - Path=/api/payments/v3/api-docs
-          filters:
-            - RewritePath=/api/payments/(?<segment>.*), /$\{segment}
-
-        - id: inventory-service-docs
-          uri: lb://inventory-service
-          predicates:
-            - Path=/api/inventory/v3/api-docs
-          filters:
-            - RewritePath=/api/inventory/(?<segment>.*), /$\{segment}
-
-        - id: notification-service-docs
-          uri: lb://notification-service
-          predicates:
-            - Path=/api/notifications/v3/api-docs
-          filters:
-            - RewritePath=/api/notifications/(?<segment>.*), /$\{segment}
-
   security:
     oauth2:
       client:

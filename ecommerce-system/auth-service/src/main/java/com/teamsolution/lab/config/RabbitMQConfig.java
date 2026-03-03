@@ -15,22 +15,22 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class RabbitMQConfig {
 
-    private final RabbitMQProperties rabbitMQProperties;
+  private final RabbitMQProperties rabbitMQProperties;
 
-    @Bean
-    public TopicExchange userExchange() {
-        return new TopicExchange(rabbitMQProperties.getExchange());
-    }
+  @Bean
+  public TopicExchange userExchange() {
+    return new TopicExchange(rabbitMQProperties.getExchange());
+  }
 
-    @Bean
-    public MessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
+  @Bean
+  public MessageConverter messageConverter() {
+    return new Jackson2JsonMessageConverter();
+  }
 
-    @Bean
-    public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory) {
-        RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(messageConverter());
-        return template;
-    }
+  @Bean
+  public AmqpTemplate amqpTemplate(ConnectionFactory connectionFactory) {
+    RabbitTemplate template = new RabbitTemplate(connectionFactory);
+    template.setMessageConverter(messageConverter());
+    return template;
+  }
 }

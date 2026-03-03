@@ -29,21 +29,29 @@ public class GatewaySecurityConfig {
             exchanges ->
                 exchanges
                     // Public endpoints
-                        .pathMatchers("/api/auth/**").permitAll()
-                        .pathMatchers("/login/oauth2/code/**").permitAll()
-                        .pathMatchers("/oauth2/**").permitAll()
-                        .pathMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/webjars/**",
-                                "/v3/api-docs/**",
-                                "/v3/api-docs"
-                        ).permitAll()
+                    .pathMatchers("/api/auth/**")
+                    .permitAll()
+                    .pathMatchers("/login/oauth2/code/**")
+                    .permitAll()
+                    .pathMatchers("/oauth2/**")
+                    .permitAll()
+                    .pathMatchers(
+                          "/api/*/swagger-ui/**",
+                          "/api/*/swagger-ui.html",
+                          "/api/*/webjars/**",
+                          "/api/*/v3/api-docs/**",
+                          "/api/*/v3/api-docs",
+                            "/webjars/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html",
+                            "/v3/api-docs/**")
+                    .permitAll()
 
-                      // All other requests need
-                      .anyExchange().authenticated())
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-            .oauth2Login(oauth2 -> oauth2.authenticationSuccessHandler(successHandler));
+                    // All other requests need
+                    .anyExchange()
+                    .authenticated())
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+        .oauth2Login(oauth2 -> oauth2.authenticationSuccessHandler(successHandler));
 
     // CORS configuration for the frontend UI
     //        http.cors(cors -> cors.configurationSource(request -> {
@@ -60,9 +68,8 @@ public class GatewaySecurityConfig {
   public ReactiveJwtDecoder reactiveJwtDecoder(@LoadBalanced WebClient.Builder webClientBuilder) {
     WebClient webClient = webClientBuilder.build();
 
-    return NimbusReactiveJwtDecoder
-            .withJwkSetUri(authServiceProperties.getJwksUri())
-            .webClient(webClient)
-            .build();
+    return NimbusReactiveJwtDecoder.withJwkSetUri(authServiceProperties.getJwksUri())
+        .webClient(webClient)
+        .build();
   }
 }

@@ -8,10 +8,9 @@ import com.teamsolution.lab.grpc.customer.CustomerServiceGrpc;
 import com.teamsolution.lab.mapper.CustomerProfileMapper;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -20,22 +19,22 @@ public class CustomerGrpcClient {
   private final CustomerProfileMapper customerProfileMapper;
 
   // Create Customer After creating account
-  public void createNewCustomer(
-          UUID accountId, String fullName, String phone, String avatarUrl) {
+  public void createNewCustomer(UUID accountId, String fullName, String phone, String avatarUrl) {
 
     ManagedChannel channel = buildChannel();
 
     try {
       // Create gRPC stub
-      CustomerServiceGrpc.CustomerServiceBlockingStub stub = CustomerServiceGrpc.newBlockingStub(channel);
+      CustomerServiceGrpc.CustomerServiceBlockingStub stub =
+          CustomerServiceGrpc.newBlockingStub(channel);
 
       CreateRequest request =
-              CreateRequest.newBuilder()
-                      .setAccountId(accountId.toString())
-                      .setFullName(fullName)
-                      .setPhone(phone)
-                      .setAvatarUrl(avatarUrl)
-                      .build();
+          CreateRequest.newBuilder()
+              .setAccountId(accountId.toString())
+              .setFullName(fullName)
+              .setPhone(phone)
+              .setAvatarUrl(avatarUrl)
+              .build();
 
       stub.createNewCustomer(request);
     } finally {
@@ -47,13 +46,12 @@ public class CustomerGrpcClient {
   public CustomerProfileGrpcResponse getCustomerProfile(UUID accountId) {
     ManagedChannel channel = buildChannel();
     try {
-      CustomerServiceGrpc.CustomerServiceBlockingStub stub = CustomerServiceGrpc.newBlockingStub(channel);
-      CustomerProfileRequest request = CustomerProfileRequest.newBuilder()
-              .setAccountId(accountId.toString())
-              .build();
+      CustomerServiceGrpc.CustomerServiceBlockingStub stub =
+          CustomerServiceGrpc.newBlockingStub(channel);
+      CustomerProfileRequest request =
+          CustomerProfileRequest.newBuilder().setAccountId(accountId.toString()).build();
 
-      CustomerProfileResponse grpcResponse =
-              stub.getCustomerProfile(request);
+      CustomerProfileResponse grpcResponse = stub.getCustomerProfile(request);
 
       return customerProfileMapper.toDto(grpcResponse);
     } finally {

@@ -17,39 +17,38 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @RequiredArgsConstructor
 public class RabbitMQConfig {
-    private final RabbitMQProperties rabbitMQProperties;
+  private final RabbitMQProperties rabbitMQProperties;
 
-    @Bean
-    public Queue emailQueue() {
-        return new Queue(rabbitMQProperties.getQueue(), true);
-    }
+  @Bean
+  public Queue emailQueue() {
+    return new Queue(rabbitMQProperties.getQueue(), true);
+  }
 
-    @Bean
-    public TopicExchange userExchange() {
-        return new TopicExchange(rabbitMQProperties.getExchange());
-    }
+  @Bean
+  public TopicExchange userExchange() {
+    return new TopicExchange(rabbitMQProperties.getExchange());
+  }
 
-    @Bean
-    public Binding binding(Queue emailQueue, TopicExchange userExchange) {
-        return BindingBuilder
-                .bind(emailQueue)
-                .to(userExchange)
-                .with(rabbitMQProperties.getRoutingKey());
-    }
+  @Bean
+  public Binding binding(Queue emailQueue, TopicExchange userExchange) {
+    return BindingBuilder.bind(emailQueue)
+        .to(userExchange)
+        .with(rabbitMQProperties.getRoutingKey());
+  }
 
-    @Bean
-    public MessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
+  @Bean
+  public MessageConverter messageConverter() {
+    return new Jackson2JsonMessageConverter();
+  }
 
-    @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
-            ConnectionFactory connectionFactory) {
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(messageConverter());
+  @Bean
+  public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+      ConnectionFactory connectionFactory) {
+    SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+    factory.setConnectionFactory(connectionFactory);
+    factory.setMessageConverter(messageConverter());
 
-        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-        return factory;
-    }
+    factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+    return factory;
+  }
 }

@@ -14,7 +14,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "addresses")
+@Table(name = "customer_addresses")
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
@@ -49,5 +49,5 @@ public class Address extends BaseEntity {
 
   @Column(name = "is_default", nullable = false)
   @Builder.Default
-  private boolean isDefault = false;
+  private Boolean isDefault = false;
 }

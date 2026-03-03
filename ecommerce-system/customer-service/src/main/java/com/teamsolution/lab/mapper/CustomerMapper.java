@@ -11,15 +11,6 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
     componentModel = "spring",
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface CustomerMapper extends BaseMapper<Customer, CustomerDto> {
-
-  @Override
-  @Mapping(target = "addresses", source = "addresses")
-  CustomerDto toDto(Customer entity);
-
-  @Override
-  @Mapping(target = "addresses", source = "addresses")
-  Customer toEntity(CustomerDto dto);
-
   @Override
   @Mapping(target = "addresses", ignore = true)
   void updateEntityFromDto(CustomerDto dto, @MappingTarget Customer entity);

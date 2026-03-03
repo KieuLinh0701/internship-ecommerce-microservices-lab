@@ -10,12 +10,5 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
     componentModel = "spring",
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface AddressMapper extends BaseMapper<Address, AddressDto> {
-  @Override
-  AddressDto toDto(Address entity);
-
-  @Override
-  Address toEntity(AddressDto dto);
-
-  @Override
   void updateEntityFromDto(AddressDto dto, @MappingTarget Address entity);
 }

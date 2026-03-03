@@ -1,14 +1,13 @@
 package com.teamsolution.lab.event;
 
 import com.teamsolution.lab.util.UuidGenerator;
+import java.time.Instant;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.time.Instant;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,13 +15,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class UserRegisteredEvent {
-    @Builder.Default
-    private UUID eventId = UuidGenerator.generate();
+  @Builder.Default private UUID eventId = UuidGenerator.generate();
 
-    private String email;
+  private String email;
 
-    private String rawOtp;
+  private String rawOtp;
 
-    @Builder.Default
-    private String timeStamp = Instant.now().toString();
+  @Builder.Default private String timeStamp = Instant.now().toString();
 }

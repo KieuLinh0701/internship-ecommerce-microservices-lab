@@ -17,7 +17,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // OAuth2 Authorization Server for issuing JWT tokens and managing OAuth2 flows
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server'
+    implementation('org.springframework.boot:spring-boot-starter-oauth2-authorization-server') {
+        exclude group: 'jakarta.ws.rs', module: 'jakarta.ws.rs-api'
+    }
+
+    // Thêm implementation đúng
+    implementation 'org.glassfish.jersey.core:jersey-common:3.1.3'
 
     // JPA for ORM and database entity management
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

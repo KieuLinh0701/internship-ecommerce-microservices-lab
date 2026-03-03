@@ -35,8 +35,8 @@ public class Customer extends BaseEntity {
   @Column(name = "phone")
   private String phone;
 
-  @Column(name = "avatar_url ")
-  private String avatarUrl ;
+  @Column(name = "avatar_url")
+  private String avatarUrl;
 
   @OneToMany(
       mappedBy = "customer",

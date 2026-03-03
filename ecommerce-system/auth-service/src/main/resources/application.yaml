@@ -65,3 +65,9 @@ jwt:
   issuer: "http://localhost:9001"
   access-token-expiration: 3600
   refresh-token-expiration: 604800
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true

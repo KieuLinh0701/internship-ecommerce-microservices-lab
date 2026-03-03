@@ -3,14 +3,13 @@ package com.teamsolution.lab.security;
 import com.teamsolution.lab.entity.Account;
 import com.teamsolution.lab.entity.AccountRole;
 import com.teamsolution.lab.enums.AccountStatus;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public record CustomUserDetails(Account account) implements UserDetails {
 
@@ -58,7 +57,6 @@ public record CustomUserDetails(Account account) implements UserDetails {
 
   @Override
   public boolean isEnabled() {
-    return !account.getIsDelete()
-            && account.getStatus() != AccountStatus.INACTIVE;
+    return !account.getIsDelete() && account.getStatus() != AccountStatus.INACTIVE;
   }
 }
