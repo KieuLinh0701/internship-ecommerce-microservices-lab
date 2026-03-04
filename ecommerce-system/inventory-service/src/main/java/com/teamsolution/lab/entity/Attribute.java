@@ -1,6 +1,6 @@
 package com.teamsolution.lab.entity;
 
-import com.teamsolution.lab.enums.SizeStatus;
+import com.teamsolution.lab.enums.AttributeStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,25 +14,24 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "m_size")
-@EqualsAndHashCode(callSuper = true)
+@Table(name = "m_attribute")
 @Getter
 @Setter
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 @SuperBuilder
-public class Size extends BaseEntity {
-  @Column(name = "name", nullable = false, length = 50)
+@EqualsAndHashCode(callSuper = true)
+public class Attribute extends BaseEntity {
+
+  @Column(nullable = false, unique = true, length = 50)
   private String name;
 
-  @Column(name = "code", nullable = false, length = 20)
+  @Column(nullable = false, unique = true, length = 20)
   private String code;
 
-  @Column(name = "sort_order", nullable = false)
-  @Builder.Default
-  private Integer sortOrder = 0;
+  @Builder.Default private Integer sortOrder = 0;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "status", nullable = false, length = 20)
+  @Column(name = "status")
   @Builder.Default
-  private SizeStatus status = SizeStatus.ACTIVE;
+  private AttributeStatus status = AttributeStatus.ACTIVE;
 }

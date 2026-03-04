@@ -11,11 +11,10 @@ import com.teamsolution.lab.mapper.AddressMapper;
 import com.teamsolution.lab.repository.AddressRepository;
 import com.teamsolution.lab.service.AddressService;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -25,13 +24,12 @@ public class AddressServiceImpl implements AddressService {
   private final CustomerServiceImpl customerService;
   private final AddressMapper addressMapper;
 
-
   @Override
   public List<AddressDto> getAddressesByAccountId(UUID accountId) {
     Customer customer = customerService.findByAccountId(accountId);
 
-    List<Address> addresses = addressRepository
-            .findByCustomerIdAndIsDeleteFalseOrderByIsDefaultDesc(customer.getId());
+    List<Address> addresses =
+        addressRepository.findByCustomerIdAndIsDeleteFalseOrderByIsDefaultDesc(customer.getId());
 
     return addressMapper.toDtoList(addresses);
   }
@@ -50,7 +48,8 @@ public class AddressServiceImpl implements AddressService {
     long count = addressRepository.countByCustomerIdAndIsDeleteFalse(customer.getId());
     boolean shouldBeDefault = Boolean.TRUE.equals(request.isDefault()) || count == 0;
 
-    Address address = Address.builder()
+    Address address =
+        Address.builder()
             .customer(customer)
             .name(request.name())
             .phone(request.phone())
@@ -64,7 +63,6 @@ public class AddressServiceImpl implements AddressService {
 
     return addressMapper.toDto(addressRepository.save(address));
   }
-
 
   @Override
   @Transactional
@@ -107,9 +105,10 @@ public class AddressServiceImpl implements AddressService {
       }
 
       addressRepository
-              .findFirstByCustomerIdAndIsDeleteFalseAndIdNotOrderByCreatedAtAsc(
-                      customer.getId(), addressId)
-              .ifPresent(other -> {
+          .findFirstByCustomerIdAndIsDeleteFalseAndIdNotOrderByCreatedAtAsc(
+              customer.getId(), addressId)
+          .ifPresent(
+              other -> {
                 other.setIsDefault(true);
                 addressRepository.save(other);
               });
@@ -136,15 +135,15 @@ public class AddressServiceImpl implements AddressService {
   }
 
   private Address findById(UUID id) {
-    return  addressRepository
-            .findByIdAndIsDeleteFalse(id)
-            .orElseThrow(
-                    () -> new ResourceNotFoundException("Address not found or deleted"));
+    return addressRepository
+        .findByIdAndIsDeleteFalse(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Address not found or deleted"));
   }
 
   private void assertOwnership(Address address, Customer customer) {
     if (!address.getCustomer().getId().equals(customer.getId())) {
-      throw new AddressAccessDeniedException("You do not have permission to access this address"); // modify custom
+      throw new AddressAccessDeniedException(
+          "You do not have permission to access this address"); // modify custom
     }
   }
 }

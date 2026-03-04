@@ -5,6 +5,8 @@ import com.teamsolution.lab.dto.request.AddressRequest;
 import com.teamsolution.lab.response.ApiResponse;
 import com.teamsolution.lab.service.AddressService;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,9 +19,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.UUID;
-
 @RestController
 @RequestMapping("/me/addresses")
 @RequiredArgsConstructor
@@ -29,15 +28,14 @@ public class AddressController {
 
   @GetMapping
   public ResponseEntity<ApiResponse<List<AddressDto>>> getMyAddresses(
-          @RequestHeader("X-Account-id") String accountId
-  ) {
-    return ResponseEntity.ok(ApiResponse.success(addressService.getAddressesByAccountId(UUID.fromString(accountId))));
+      @RequestHeader("X-Account-id") String accountId) {
+    return ResponseEntity.ok(
+        ApiResponse.success(addressService.getAddressesByAccountId(UUID.fromString(accountId))));
   }
 
   @PostMapping
   public ResponseEntity<ApiResponse<AddressDto>> add(
-          @RequestHeader("X-Account-id") String accountId,
-          @Valid @RequestBody AddressRequest request) {
+      @RequestHeader("X-Account-id") String accountId, @Valid @RequestBody AddressRequest request) {
 
     AddressDto data = addressService.add(UUID.fromString(accountId), request);
     return ResponseEntity.ok(ApiResponse.success(data));
@@ -45,9 +43,9 @@ public class AddressController {
 
   @PutMapping("/{id}")
   public ResponseEntity<ApiResponse<AddressDto>> update(
-          @RequestHeader("X-Account-id") String accountId,
-          @PathVariable UUID id,
-          @Valid @RequestBody AddressRequest request) {
+      @RequestHeader("X-Account-id") String accountId,
+      @PathVariable UUID id,
+      @Valid @RequestBody AddressRequest request) {
 
     AddressDto data = addressService.update(UUID.fromString(accountId), id, request);
     return ResponseEntity.ok(ApiResponse.success(data));
@@ -55,8 +53,7 @@ public class AddressController {
 
   @DeleteMapping("/{id}")
   public ResponseEntity<ApiResponse<Void>> delete(
-          @RequestHeader("X-Account-id") String accountId,
-          @PathVariable UUID id) {
+      @RequestHeader("X-Account-id") String accountId, @PathVariable UUID id) {
 
     addressService.delete(UUID.fromString(accountId), id);
     return ResponseEntity.ok(ApiResponse.success(null));
@@ -64,8 +61,7 @@ public class AddressController {
 
   @PutMapping("/{id}/set-default")
   public ResponseEntity<ApiResponse<AddressDto>> setDefault(
-          @RequestHeader("X-Account-id") String accountId,
-          @PathVariable UUID id) {
+      @RequestHeader("X-Account-id") String accountId, @PathVariable UUID id) {
 
     AddressDto data = addressService.setDefault(UUID.fromString(accountId), id);
     return ResponseEntity.ok(ApiResponse.success(data));

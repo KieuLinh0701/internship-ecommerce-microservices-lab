@@ -6,6 +6,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -33,15 +35,27 @@ public class ProductVariantInventory extends BaseEntity {
   @Builder.Default
   private Integer reservedQuantity = 0;
 
-  @Column(name = "available_quantity")
-  @Builder.Default
-  private Integer availableQuantity = 0;
-
   @Column(name = "low_stock_threshold")
   @Builder.Default
   private Integer lowStockThreshold = 10;
 
-  public void recalculateAvailable() {
-    this.availableQuantity = this.quantity - this.reservedQuantity;
+  @Column(name = "manufacture_date")
+  private LocalDate manufactureDate;
+
+  @Column(name = "expiry_date")
+  private LocalDate expiryDate;
+
+  public boolean isExpired() {
+    if (expiryDate == null) {
+      return false;
+    }
+    return LocalDate.now().isAfter(expiryDate);
+  }
+
+  public long daysUntilExpiry() {
+    if (expiryDate == null) {
+      return -1;
+    }
+    return ChronoUnit.DAYS.between(LocalDate.now(), expiryDate);
   }
 }

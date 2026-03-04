@@ -1,6 +1,6 @@
 CREATE TABLE m_category
 (
-    id         UUID PRIMARY KEY,
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name       VARCHAR(100) NOT NULL,
     parent_id  UUID NULL,
     slug       VARCHAR(100) NOT NULL UNIQUE,
@@ -20,7 +20,7 @@ CREATE TABLE m_category
 
 CREATE TABLE m_brand
 (
-    id          UUID PRIMARY KEY,
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        VARCHAR(100) NOT NULL,
     slug        VARCHAR(100) NOT NULL UNIQUE,
     logo_url    VARCHAR(500),
@@ -36,7 +36,7 @@ CREATE TABLE m_brand
 
 CREATE TABLE m_product
 (
-    id          UUID PRIMARY KEY,
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name        VARCHAR(255) NOT NULL,
     slug        VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
@@ -64,7 +64,7 @@ CREATE TABLE m_product
 
 CREATE TABLE product_images
 (
-    id           UUID PRIMARY KEY,
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id   UUID         NOT NULL,
     image_url    VARCHAR(500) NOT NULL,
     sort_order   INTEGER      NOT NULL DEFAULT 0,
@@ -82,13 +82,12 @@ CREATE TABLE product_images
             ON DELETE CASCADE
 );
 
-CREATE TABLE m_product_variant
+CREATE TABLE product_variants
 (
-    id                  UUID PRIMARY KEY,
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id          UUID         NOT NULL,
     sku                 VARCHAR(100) NOT NULL UNIQUE,
     price               BIGINT       NOT NULL,
-    attribute_value_ids UUID[],
     image_url           VARCHAR(500),
     created_at          TIMESTAMP    NOT NULL DEFAULT NOW(),
     created_by          UUID NULL,
@@ -105,7 +104,7 @@ CREATE TABLE m_product_variant
 
 CREATE TABLE m_attribute
 (
-    id         UUID PRIMARY KEY,
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name       VARCHAR(50) NOT NULL UNIQUE,
     code       VARCHAR(20) NOT NULL UNIQUE,
     sort_order INTEGER     NOT NULL DEFAULT 0,
@@ -120,7 +119,7 @@ CREATE TABLE m_attribute
 
 CREATE TABLE m_attribute_value
 (
-    id           UUID PRIMARY KEY,
+    id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     attribute_id UUID        NOT NULL,
     value        VARCHAR(50) NOT NULL,
     code         VARCHAR(20) NOT NULL,
@@ -141,7 +140,7 @@ CREATE TABLE m_attribute_value
 
 CREATE TABLE product_variant_attribute_value
 (
-    id                 UUID PRIMARY KEY,
+    id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     variant_id         UUID      NOT NULL,
     attribute_value_id UUID      NOT NULL,
     created_at         TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -153,7 +152,7 @@ CREATE TABLE product_variant_attribute_value
 
     CONSTRAINT fk_pvav_variant
         FOREIGN KEY (variant_id)
-            REFERENCES m_product_variant (id)
+            REFERENCES product_variants (id)
             ON DELETE CASCADE,
 
     CONSTRAINT fk_pvav_attribute_value
@@ -166,11 +165,10 @@ CREATE TABLE product_variant_attribute_value
 
 CREATE TABLE product_variant_inventory
 (
-    id                  UUID PRIMARY KEY,
+    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     variant_id          UUID      NOT NULL UNIQUE,
     quantity            INTEGER   NOT NULL DEFAULT 0,
     reserved_quantity   INTEGER   NOT NULL DEFAULT 0,
-    available_quantity  INTEGER   NOT NULL DEFAULT 0,
     low_stock_threshold INTEGER   NOT NULL DEFAULT 10,
     created_at          TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by          UUID NULL,
@@ -181,6 +179,6 @@ CREATE TABLE product_variant_inventory
 
     CONSTRAINT fk_inventory_variant
         FOREIGN KEY (variant_id)
-            REFERENCES m_product_variant (id)
+            REFERENCES product_variants (id)
             ON DELETE CASCADE
 );

@@ -1,15 +1,10 @@
 package com.teamsolution.lab.entity;
 
-import com.teamsolution.lab.enums.ProductVariantStatus;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -19,32 +14,26 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "product_variants")
+@Table(name = "product_images")
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
 @NoArgsConstructor(force = true)
 @SuperBuilder
-public class ProductVariant extends BaseEntity {
+public class ProductImage extends BaseEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "product_id")
   private Product product;
 
-  @Column(name = "sku")
-  private String sku;
-
-  @Column(name = "price")
-  private Long price;
-
   @Column(name = "image_url")
   private String imageUrl;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "status")
+  @Column(name = "sort_order")
   @Builder.Default
-  private ProductVariantStatus status = ProductVariantStatus.ACTIVE;
+  private int sortOrder = 0;
 
-  @OneToOne(mappedBy = "variant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private ProductVariantInventory inventory;
+  @Column(name = "is_thumbnail")
+  @Builder.Default
+  private Boolean isThumbnail = false;
 }

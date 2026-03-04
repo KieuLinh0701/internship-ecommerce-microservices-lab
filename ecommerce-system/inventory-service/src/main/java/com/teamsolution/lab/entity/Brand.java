@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.List;
+import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,8 @@ public class Brand extends BaseEntity {
   private String logoUrl;
 
   @Column(name = "status")
-  private boolean status;
+  @Builder.Default
+  private Boolean status = true;
 
   @Column(name = "description")
   private String description;

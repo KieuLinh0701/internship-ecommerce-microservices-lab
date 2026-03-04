@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
-    info = @Info(title = "Customer Service API", version = "v1.0"),
+    info = @Info(title = "Inventory Service API", version = "v1.0"),
     servers = {
-      @Server(url = "http://localhost:9000/api/customers", description = "Gateway - Local")
+      @Server(url = "http://localhost:9000/api/inventory", description = "Gateway - Local")
     },
     security = @SecurityRequirement(name = "bearerAuth"))
 @SecurityScheme(
