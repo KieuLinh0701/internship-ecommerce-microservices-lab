@@ -7,5 +7,5 @@ import java.util.UUID;
 public interface CategoryService extends BaseService<CategoryDto, UUID> {
   List<CategoryDto> getActiveCategoryTree();
 
-  List<CategoryDto> getActiveCategoryBySlug(String slug);
+  CategoryDto getActiveCategoryBySlug(String slug);
 }

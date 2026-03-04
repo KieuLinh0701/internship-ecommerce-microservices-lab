@@ -10,7 +10,6 @@ import com.teamsolution.lab.repository.CategoryRepository;
 import com.teamsolution.lab.repository.ProductRepository;
 import com.teamsolution.lab.service.ProductService;
 import com.teamsolution.lab.specification.ProductSpecification;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,14 +34,16 @@ public class ProductServiceImpl extends BaseServiceImpl<Product, ProductListDto,
     this.categoryRepository = categoryRepository;
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public List<ProductListDto> getByCategoryId(UUID categoryId) {
-    if (!categoryRepository.existsById(categoryId)) {
-      throw new ResourceNotFoundException("Category with ID " + categoryId + " does not exist.");
-    }
-    return productMapper.toDtoList(productRepository.findByCategoryIdAndIsDeleteFalse(categoryId));
-  }
+  //  @Override
+  //  @Transactional(readOnly = true)
+  //  public List<ProductListDto> getByCategoryId(UUID categoryId) {
+  //    if (!categoryRepository.existsById(categoryId)) {
+  //      throw new ResourceNotFoundException("Category with ID " + categoryId + " does not
+  // exist.");
+  //    }
+  //    return
+  // productMapper.toDtoList(productRepository.findByCategoryIdAndIsDeleteFalse(categoryId));
+  //  }
 
   @Override
   public Page<ProductListDto> getProducts(Pageable pageable, ProductFilterRequest filterRequest) {

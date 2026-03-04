@@ -18,8 +18,7 @@ CREATE TABLE accounts (
     id UUID PRIMARY KEY   DEFAULT gen_random_uuid(),
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'INACTIVE',
-    is_verified BOOLEAN DEFAULT FALSE,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by UUID,
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -34,7 +33,7 @@ ON accounts(email, is_delete);
 CREATE TABLE account_roles (
     account_id UUID NOT NULL,
     role_id UUID NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     created_by UUID,
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),

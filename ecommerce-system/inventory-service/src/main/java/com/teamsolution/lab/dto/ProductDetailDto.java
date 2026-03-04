@@ -1,6 +1,5 @@
 package com.teamsolution.lab.dto;
 
-import com.teamsolution.lab.enums.ProductStatus;
 import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -16,8 +15,11 @@ public class ProductDetailDto {
   private UUID id;
   private String name;
   private String description;
-  private UUID categoryId;
+  private UUID categorySlug;
+  private String categoryName;
+  private String brandSlug;
+  private String brandName;
+  private String brandLogoUrl;
   private Long basePrice;
-  private ProductStatus status;
   private List<ProductVariantDto> variants;
 }

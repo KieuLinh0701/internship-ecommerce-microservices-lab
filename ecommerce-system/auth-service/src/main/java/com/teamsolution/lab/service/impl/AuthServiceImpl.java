@@ -33,15 +33,14 @@ import com.teamsolution.lab.service.helper.JwtTokenService;
 import com.teamsolution.lab.service.helper.NotificationService;
 import com.teamsolution.lab.service.helper.RefreshTokenService;
 import jakarta.transaction.Transactional;
+import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Set;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

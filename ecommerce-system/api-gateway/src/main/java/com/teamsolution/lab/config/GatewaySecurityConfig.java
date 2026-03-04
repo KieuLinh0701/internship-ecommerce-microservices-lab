@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -31,20 +32,22 @@ public class GatewaySecurityConfig {
                     // Public endpoints
                     .pathMatchers("/api/auth/**")
                     .permitAll()
+                    .pathMatchers(HttpMethod.GET, "/api/inventory/**")
+                    .permitAll()
                     .pathMatchers("/login/oauth2/code/**")
                     .permitAll()
                     .pathMatchers("/oauth2/**")
                     .permitAll()
                     .pathMatchers(
-                          "/api/*/swagger-ui/**",
-                          "/api/*/swagger-ui.html",
-                          "/api/*/webjars/**",
-                          "/api/*/v3/api-docs/**",
-                          "/api/*/v3/api-docs",
-                            "/webjars/**",
-                            "/swagger-ui/**",
-                            "/swagger-ui.html",
-                            "/v3/api-docs/**")
+                        "/api/*/swagger-ui/**",
+                        "/api/*/swagger-ui.html",
+                        "/api/*/webjars/**",
+                        "/api/*/v3/api-docs/**",
+                        "/api/*/v3/api-docs",
+                        "/webjars/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**")
                     .permitAll()
 
                     // All other requests need

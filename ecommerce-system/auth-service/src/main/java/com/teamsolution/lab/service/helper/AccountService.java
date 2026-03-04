@@ -7,6 +7,7 @@ import com.teamsolution.lab.entity.Role;
 import com.teamsolution.lab.enums.AccountRoleStatus;
 import com.teamsolution.lab.enums.AccountStatus;
 import com.teamsolution.lab.enums.RoleStatus;
+import com.teamsolution.lab.enums.SystemRole;
 import com.teamsolution.lab.exception.DuplicateResourceException;
 import com.teamsolution.lab.exception.ResourceNotFoundException;
 import com.teamsolution.lab.grpc.CustomerGrpcClient;
@@ -93,7 +94,7 @@ public class AccountService {
 
     Role userRole =
         roleRepository
-            .findByNameAndStatusAndIsDelete("CUSTOMER", RoleStatus.ACTIVE, false)
+            .findByNameAndStatusAndIsDelete(SystemRole.CUSTOMER.name(), RoleStatus.ACTIVE, false)
             .orElseThrow(
                 () -> new ResourceNotFoundException("Role not found or inactive or deleted"));
 
