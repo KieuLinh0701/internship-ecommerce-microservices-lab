@@ -1,20 +1,20 @@
 package com.teamsolution.lab.service;
 
 import com.teamsolution.lab.dto.AddressDto;
-import com.teamsolution.lab.dto.request.AddressRequest;
+import com.teamsolution.lab.dto.request.AddressAddRequest;
+import com.teamsolution.lab.dto.request.AddressUpdateRequest;
+
 import java.util.List;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
 
-@Service
 public interface AddressService {
   List<AddressDto> getAddressesByAccountId(UUID accountId);
 
-  AddressDto add(UUID accountId, AddressRequest request);
+  AddressDto addAddress(UUID accountId, AddressAddRequest request);
 
-  AddressDto update(UUID accountId, UUID id, AddressRequest request);
+  AddressDto updateAddress(UUID accountId, UUID addressId, AddressUpdateRequest request);
 
-  void delete(UUID accountId, UUID addressId);
+  void deleteAddress(UUID accountId, UUID addressId);
 
-  AddressDto setDefault(UUID accountId, UUID addressId);
+  AddressDto setDefaultAddress(UUID accountId, UUID addressId);
 }

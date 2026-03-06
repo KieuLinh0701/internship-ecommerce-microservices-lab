@@ -1,15 +1,11 @@
 package com.teamsolution.lab.service;
 
-import com.teamsolution.lab.dto.BrandDto;
-import com.teamsolution.lab.dto.BrandListDto;
-import com.teamsolution.lab.dto.request.BrandFilterRequest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.teamsolution.lab.entity.ProductVariant;
 
-public interface BrandService {
+import java.util.UUID;
 
-    Page<BrandListDto> getActiveBrands(Pageable pageable, BrandFilterRequest request);
+public interface ProductVariantService {
 
-    BrandDto getActiveBrandBySlug(String slug);
+    public ProductVariant findByIdAndProductId(UUID productId, UUID variantId);
 
 }

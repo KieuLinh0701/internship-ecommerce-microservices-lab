@@ -1,20 +1,24 @@
 package com.teamsolution.lab.service.impl;
 
+import com.teamsolution.lab.config.properties.OtpSecurityProperties;
 import com.teamsolution.lab.dto.request.ChangePasswordRequest;
 import com.teamsolution.lab.dto.request.GoogleLoginRequest;
 import com.teamsolution.lab.dto.request.LoginRequest;
 import com.teamsolution.lab.dto.request.RefreshRequest;
 import com.teamsolution.lab.dto.request.RegisterRequest;
+import com.teamsolution.lab.dto.request.ResendOtpPasswordResetRequest;
+import com.teamsolution.lab.dto.request.ResendVerificationOtpRequest;
 import com.teamsolution.lab.dto.request.ResetPasswordRequest;
 import com.teamsolution.lab.dto.request.SendOtpResetPasswordRequest;
 import com.teamsolution.lab.dto.request.SwitchRoleRequest;
 import com.teamsolution.lab.dto.request.VerifyEmailRequest;
 import com.teamsolution.lab.dto.request.VerifyPasswordResetRequest;
 import com.teamsolution.lab.dto.response.AuthResponse;
-import com.teamsolution.lab.dto.response.CustomerProfileGrpcResponse;
 import com.teamsolution.lab.dto.response.LoginResponse;
 import com.teamsolution.lab.dto.response.ProfileResponse;
 import com.teamsolution.lab.dto.response.RegisterResponse;
+import com.teamsolution.lab.dto.response.ResendOtpPasswordResetResponse;
+import com.teamsolution.lab.dto.response.ResendVerificationOtpResponse;
 import com.teamsolution.lab.dto.response.SendOtpResetPasswordResponse;
 import com.teamsolution.lab.dto.response.VerifyPasswordResetResponse;
 import com.teamsolution.lab.entity.Account;
@@ -25,22 +29,24 @@ import com.teamsolution.lab.exception.InvalidAccountStatusException;
 import com.teamsolution.lab.exception.InvalidPasswordException;
 import com.teamsolution.lab.exception.InvalidTokenException;
 import com.teamsolution.lab.grpc.CustomerGrpcClient;
+import com.teamsolution.lab.kafka.NotificationEventProducer;
+import com.teamsolution.lab.kafka.enums.NotificationEventType;
 import com.teamsolution.lab.security.CustomUserDetails;
 import com.teamsolution.lab.service.AuthService;
 import com.teamsolution.lab.service.helper.AccountService;
 import com.teamsolution.lab.service.helper.AuthHelperService;
 import com.teamsolution.lab.service.helper.JwtTokenService;
-import com.teamsolution.lab.service.helper.NotificationService;
 import com.teamsolution.lab.service.helper.RefreshTokenService;
 import jakarta.transaction.Transactional;
-import java.util.Set;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -51,9 +57,10 @@ public class AuthServiceImpl implements AuthService {
   private final JwtTokenService jwtTokenService;
   private final AuthHelperService authHelperService;
   private final RefreshTokenService refreshTokenService;
-  private final NotificationService notificationService;
+  private final NotificationEventProducer notificationEventProducer;
   private final AccountService accountService;
   private final CustomerGrpcClient customerGrpcClient;
+  private final OtpSecurityProperties otpSecurityProperties;
 
   // login
   @Override
@@ -92,9 +99,9 @@ public class AuthServiceImpl implements AuthService {
             request.fullName(),
             request.phone());
 
-    notificationService.sendVerificationEmail(request.email(), rawOtp);
+    notificationEventProducer.sendOtpEmail(request.email(), rawOtp, NotificationEventType.EMAIL_VERIFICATION);
 
-    return new RegisterResponse(request.email(), 15 * 60);
+    return new RegisterResponse(request.email(), otpSecurityProperties.getVerificationExpiresInSeconds());
   }
 
   @Override
@@ -106,13 +113,30 @@ public class AuthServiceImpl implements AuthService {
     authHelperService.activatePendingAccount(account.getId(), request.otp());
   }
 
+  @Override
+  public ResendVerificationOtpResponse resendVerificationOtp(
+          ResendVerificationOtpRequest request) {
+
+      Account account = accountService.findByEmail(request.email());
+
+      authHelperService.handleResendOtp(
+              account,
+              VerificationTokenType.EMAIL_VERIFICATION
+      );
+
+      return new ResendVerificationOtpResponse(
+              request.email(),
+              otpSecurityProperties.getVerificationExpiresInSeconds()
+      );
+  }
+
   // Refresh token
   @Override
   @Transactional
   public AuthResponse refresh(String currentRole, RefreshRequest request) {
     RefreshToken storedToken = refreshTokenService.validateAndGet(request.refreshToken());
 
-    verifyTokenOwnerShip(storedToken, request.refreshToken());
+      verifyTokenOwnership(storedToken, request.refreshToken());
 
     storedToken.setUsed(true);
 
@@ -125,15 +149,9 @@ public class AuthServiceImpl implements AuthService {
 
     Set<String> roles = accountService.getActiveRoleNamesByAccountId(accountId);
 
-    CustomerProfileGrpcResponse customerProfileResponse =
-        customerGrpcClient.getCustomerProfile(account.getId());
-
     return new ProfileResponse(
         account.getId(),
         account.getEmail(),
-        customerProfileResponse.fullName(),
-        customerProfileResponse.phone(),
-        customerProfileResponse.avatarUrl(),
         account.getStatus(),
         roles);
   }
@@ -149,6 +167,23 @@ public class AuthServiceImpl implements AuthService {
 
     return authHelperService.handleResetPassword(account);
   }
+
+    @Override
+    public ResendOtpPasswordResetResponse resendOtpPasswordReset(
+            ResendOtpPasswordResetRequest request) {
+
+        Account account = accountService.findByEmail(request.email());
+
+        authHelperService.handleResendOtp(
+                account,
+                VerificationTokenType.PASSWORD_RESET
+        );
+
+        return new ResendOtpPasswordResetResponse(
+                request.email(),
+                otpSecurityProperties.getVerificationExpiresInSeconds()
+        );
+    }
 
   @Override
   public VerifyPasswordResetResponse verifyResetPassword(VerifyPasswordResetRequest request) {
@@ -179,7 +214,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     if (passwordEncoder.matches(request.newPassword(), account.getPassword())) {
-      throw new InvalidPasswordException("New password is different from old password");
+      throw new InvalidPasswordException("New password must be different from old password");
     }
 
     accountService.updatePassword(account.getEmail(), request.newPassword());
@@ -202,7 +237,7 @@ public class AuthServiceImpl implements AuthService {
     return tokens;
   }
 
-  private void verifyTokenOwnerShip(RefreshToken storedToken, String rawRefreshToken) {
+  private void verifyTokenOwnership(RefreshToken storedToken, String rawRefreshToken) {
     UUID accountIdFromJwt = UUID.fromString(jwtTokenService.extractSubject(rawRefreshToken));
 
     if (!storedToken.getAccount().getId().equals(accountIdFromJwt)) {

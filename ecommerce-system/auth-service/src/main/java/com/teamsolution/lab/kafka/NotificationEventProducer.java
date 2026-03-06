@@ -1,4 +1,4 @@
-package com.teamsolution.lab.service.helper;
+package com.teamsolution.lab.kafka;
 
 import com.teamsolution.lab.kafka.enums.NotificationEventType;
 import com.teamsolution.lab.kafka.messaging.KafkaTopics;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class NotificationService {
+public class NotificationEventProducer {
     private final KafkaTemplate<String, NotificationEventMessage> kafkaTemplate;
 
     // TODO: Temporary sending directly to email service via Kafka.

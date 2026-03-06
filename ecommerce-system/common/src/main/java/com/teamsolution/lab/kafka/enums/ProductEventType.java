@@ -1,4 +1,4 @@
-package com.teamsolution.lab.enums;
+package com.teamsolution.lab.kafka.enums;
 
 public enum ProductEventType {
   CREATED,

@@ -1,6 +1,8 @@
-package com.teamsolution.lab.messaging;
+package com.teamsolution.lab.kafka.messaging;
 
-import com.teamsolution.lab.enums.ProductEventType;
+import com.teamsolution.lab.kafka.enums.ProductEventType;
+import com.teamsolution.lab.util.UuidGenerator;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +13,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ProductEventMessage {
+  @Builder.Default private UUID eventId = UuidGenerator.generate();
+
   private ProductEventType eventType;
   private String productId;
 }

@@ -1,6 +1,6 @@
 package com.teamsolution.lab.mapper;
 
-import com.teamsolution.lab.dto.BrandDto;
+import com.teamsolution.lab.dto.BrandListDto;
 import com.teamsolution.lab.entity.Brand;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -9,13 +9,14 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(
     componentModel = "spring",
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface BrandMapper extends BaseMapper<Brand, BrandDto> {
+public interface BrandListMapper
+        extends BaseMapper<Brand, BrandListDto> {
     @Override
-    BrandDto toDto(Brand entity);
+    BrandListDto toDto(Brand entity);
 
     @Override
-    Brand toEntity(BrandDto dto);
+    Brand toEntity(BrandListDto dto);
 
     @Override
-    void updateEntityFromDto(BrandDto dto, @MappingTarget Brand entity);
+    void updateEntityFromDto(BrandListDto dto, @MappingTarget Brand entity);
 }

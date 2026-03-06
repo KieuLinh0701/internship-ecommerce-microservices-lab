@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
-public record AddressCreateRequest(
+public record AddressAddRequest(
     @NotBlank(message = "Name is required") String name,
     @NotBlank(message = "Phone is required")
     @NotBlank(message = "Phone number is required")
@@ -18,7 +18,7 @@ public record AddressCreateRequest(
     @NotBlank(message = "Ward name is required") String wardName,
     @NotBlank(message = "Detail is required") String detail,
     Boolean isDefault) {
-  public AddressCreateRequest {
+  public AddressAddRequest {
     if (isDefault == null) {
       isDefault = false;
     }

@@ -1,6 +1,5 @@
 package com.teamsolution.lab.service;
 
-import com.teamsolution.lab.event.UserRegisteredEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
@@ -14,26 +13,20 @@ public class EmailService {
 
   private final JavaMailSender mailSender;
 
-  public void sendWelcomeEmail(UserRegisteredEvent event) {
-    try {
-      String subject = "Mã OTP xác thực tài khoản";
-      String body =
-          "Mã OTP của bạn là: "
-              + event.getRawOtp()
-              + "\n\n"
-              + "Mã có hiệu lực trong 5 phút.\n"
-              + "Vui lòng không chia sẻ mã này cho người khác.";
-
-      SimpleMailMessage message = new SimpleMailMessage();
-      message.setTo(event.getEmail());
-      message.setSubject(subject);
-      message.setText(body);
-
-      mailSender.send(message);
-
-    } catch (Exception e) {
-      log.error("Email sending failed: {}", e.getMessage(), e);
-      throw new RuntimeException("Email sending failed", e);
+    public void sendVerificationEmail(String email, String rawOtp) {
+        send(email, "Verify your email", "Your OTP: " + rawOtp);
     }
-  }
+
+    public void sendPasswordResetEmail(String email, String rawOtp) {
+        send(email, "Reset your password", "Your OTP: " + rawOtp);
+    }
+
+    private void send(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+        log.info("Email sent to: {}", to);
+    }
 }

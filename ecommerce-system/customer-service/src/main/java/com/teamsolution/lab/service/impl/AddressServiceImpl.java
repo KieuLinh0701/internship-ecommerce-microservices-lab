@@ -1,7 +1,8 @@
 package com.teamsolution.lab.service.impl;
 
 import com.teamsolution.lab.dto.AddressDto;
-import com.teamsolution.lab.dto.request.AddressRequest;
+import com.teamsolution.lab.dto.request.AddressAddRequest;
+import com.teamsolution.lab.dto.request.AddressUpdateRequest;
 import com.teamsolution.lab.entity.Address;
 import com.teamsolution.lab.entity.Customer;
 import com.teamsolution.lab.exception.AddressAccessDeniedException;
@@ -10,18 +11,20 @@ import com.teamsolution.lab.exception.ResourceNotFoundException;
 import com.teamsolution.lab.mapper.AddressMapper;
 import com.teamsolution.lab.repository.AddressRepository;
 import com.teamsolution.lab.service.AddressService;
+import com.teamsolution.lab.service.CustomerService;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
 
   private final AddressRepository addressRepository;
-  private final CustomerServiceImpl customerService;
+  private final CustomerService customerService;
   private final AddressMapper addressMapper;
 
   @Override
@@ -36,17 +39,15 @@ public class AddressServiceImpl implements AddressService {
 
   @Override
   @Transactional
-  public AddressDto add(UUID accountId, AddressRequest request) {
+  public AddressDto addAddress(UUID accountId, AddressAddRequest request) {
     Customer customer = customerService.findByAccountId(accountId);
 
-    // if isDefault = true → unset all old default
-    if (request.isDefault()) {
-      addressRepository.unsetDefaultByCustomerId(customer.getId());
-    }
+      long count = addressRepository.countByCustomerIdAndIsDeleteFalse(customer.getId());
+      boolean shouldBeDefault = request.isDefault() || count == 0;
 
-    // If there is no address yet → automatically set as default
-    long count = addressRepository.countByCustomerIdAndIsDeleteFalse(customer.getId());
-    boolean shouldBeDefault = Boolean.TRUE.equals(request.isDefault()) || count == 0;
+      if (shouldBeDefault) {
+          addressRepository.unsetDefaultByCustomerId(customer.getId());
+      }
 
     Address address =
         Address.builder()
@@ -66,17 +67,12 @@ public class AddressServiceImpl implements AddressService {
 
   @Override
   @Transactional
-  public AddressDto update(UUID accountId, UUID addressId, AddressRequest request) {
+  public AddressDto updateAddress(UUID accountId, UUID addressId, AddressUpdateRequest request) {
     Customer customer = customerService.findByAccountId(accountId);
 
     Address address = findById(addressId);
 
     assertOwnership(address, customer);
-
-    // if isDefault = true → unset all old default
-    if (Boolean.TRUE.equals(request.isDefault()) && !address.getIsDefault()) {
-      addressRepository.unsetDefaultByCustomerId(customer.getId());
-    }
 
     address.setName(request.name());
     address.setPhone(request.phone());
@@ -85,14 +81,13 @@ public class AddressServiceImpl implements AddressService {
     address.setWardCode(request.wardCode());
     address.setWardName(request.wardName());
     address.setDetail(request.detail());
-    address.setIsDefault(Boolean.TRUE.equals(request.isDefault()));
 
     return addressMapper.toDto(addressRepository.save(address));
   }
 
   @Override
   @Transactional
-  public void delete(UUID accountId, UUID addressId) {
+  public void deleteAddress(UUID accountId, UUID addressId) {
     Customer customer = customerService.findByAccountId(accountId);
     Address address = findById(addressId);
     assertOwnership(address, customer);
@@ -121,7 +116,7 @@ public class AddressServiceImpl implements AddressService {
 
   @Override
   @Transactional
-  public AddressDto setDefault(UUID accountId, UUID addressId) {
+  public AddressDto setDefaultAddress(UUID accountId, UUID addressId) {
     Customer customer = customerService.findByAccountId(accountId);
     Address address = findById(addressId);
     assertOwnership(address, customer);
@@ -143,7 +138,7 @@ public class AddressServiceImpl implements AddressService {
   private void assertOwnership(Address address, Customer customer) {
     if (!address.getCustomer().getId().equals(customer.getId())) {
       throw new AddressAccessDeniedException(
-          "You do not have permission to access this address"); // modify custom
+          "You do not have permission to access this address");
     }
   }
 }

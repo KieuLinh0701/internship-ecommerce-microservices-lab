@@ -39,6 +39,12 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // Elasticsearch
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
     // PostgreSQL Driver: JDBC driver for connecting to PostgreSQL database
     runtimeOnly 'org.postgresql:postgresql'
 

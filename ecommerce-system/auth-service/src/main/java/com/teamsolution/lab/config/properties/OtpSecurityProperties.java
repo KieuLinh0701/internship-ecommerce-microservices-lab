@@ -8,8 +8,9 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "rabbitmq")
-public class RabbitMQProperties {
-  private String exchange;
-  private String routingKey;
+@ConfigurationProperties(prefix = "security.otp")
+public class OtpSecurityProperties {
+  private int maxResend;
+  private int cooldownSeconds;
+  private int verificationExpiresInSeconds;
 }

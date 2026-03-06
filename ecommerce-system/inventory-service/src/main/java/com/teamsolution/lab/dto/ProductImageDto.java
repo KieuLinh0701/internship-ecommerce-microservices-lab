@@ -1,27 +1,19 @@
 package com.teamsolution.lab.dto;
 
-import com.teamsolution.lab.enums.ProductStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductDetailDto {
+public class ProductImageDto {
     private UUID id;
-    private String name;
-    private String slug;
-    private String description;
-    private Long basePrice;
-    private ProductStatus status;
-    private CategoryRefDto category;
-    private BrandRefDto brand;
-    private List<ProductImageDto> images;
-    private List<ProductVariantDto> variants;
+    private String imageUrl;
+    private Integer sortOrder;
+    private Boolean isThumbnail;
 }

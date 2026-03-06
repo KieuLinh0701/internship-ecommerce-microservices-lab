@@ -1,21 +1,33 @@
 package com.teamsolution.lab.mapper;
 
-import com.teamsolution.lab.dto.BrandDto;
-import com.teamsolution.lab.entity.Brand;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import com.teamsolution.lab.document.ProductDocument;
+import com.teamsolution.lab.entity.Product;
+import com.teamsolution.lab.entity.ProductImage;
+import org.springframework.stereotype.Component;
 
-@Mapper(
-    componentModel = "spring",
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface BrandMapper extends BaseMapper<Brand, BrandDto> {
-    @Override
-    BrandDto toDto(Brand entity);
+@Component
+public class ProductDocumentMapper {
 
-    @Override
-    Brand toEntity(BrandDto dto);
+    public ProductDocument toDocument(Product product) {
+        String thumbnail = product.getImages() == null ? null :
+                product.getImages().stream()
+                        .filter(img -> !img.getIsDelete() && Boolean.TRUE.equals(img.getIsThumbnail()))
+                        .findFirst()
+                        .map(ProductImage::getImageUrl)
+                        .orElse(null);
 
-    @Override
-    void updateEntityFromDto(BrandDto dto, @MappingTarget Brand entity);
+        return ProductDocument.builder()
+                .id(product.getId().toString())
+                .name(product.getName())
+                .description(product.getDescription())
+                .slug(product.getSlug())
+                .basePrice(product.getBasePrice())
+                .status(product.getStatus().name())
+                .thumbnail(thumbnail)
+                .categorySlug(product.getCategory() != null ? product.getCategory().getSlug() : null)
+                .brandSlug(product.getBrand() != null ? product.getBrand().getSlug() : null)
+                .isDelete(product.getIsDelete())
+                .createdAt(product.getCreatedAt().toLocalDate())
+                .build();
+    }
 }

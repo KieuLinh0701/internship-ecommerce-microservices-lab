@@ -5,14 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AttributeValueRefDto {
+public class AttributeWithValuesDto {
     private UUID id;
-    private String value;
-    private String code;
+    private String name;
+    private List<AttributeValueRefDto> values;
 }

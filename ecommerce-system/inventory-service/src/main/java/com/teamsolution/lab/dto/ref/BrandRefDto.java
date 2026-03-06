@@ -1,13 +1,18 @@
 package com.teamsolution.lab.dto.ref;
 
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class CategoryRefDto {
-    private UUID id;
-    private String name;
-}
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+import java.util.UUID;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class BrandRefDto {
     private UUID id;
     private String name;
+    private String slug;
 }
