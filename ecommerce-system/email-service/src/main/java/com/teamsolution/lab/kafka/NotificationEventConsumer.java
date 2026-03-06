@@ -12,26 +12,19 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class NotificationEventConsumer {
-    private final EmailService emailService;
+  private final EmailService emailService;
 
-    @KafkaListener(
-            topics = KafkaTopics.NOTIFICATION_EVENTS,
-            groupId = "email-group"
-    )
-    public void consume(NotificationEventMessage message) {
-        log.info("Received notification event: {} for email: {}",
-                message.getType(), message.getEmail());
+  @KafkaListener(topics = KafkaTopics.NOTIFICATION_EVENTS, groupId = "email-group")
+  public void consume(NotificationEventMessage message) {
+    log.info(
+        "Received notification event: {} for email: {}", message.getType(), message.getEmail());
 
-        switch (message.getType()) {
-            case EMAIL_VERIFICATION -> emailService.sendVerificationEmail(
-                    message.getEmail(),
-                    message.getRawOtp()
-            );
-            case PASSWORD_RESET -> emailService.sendPasswordResetEmail(
-                    message.getEmail(),
-                    message.getRawOtp()
-            );
-            default -> log.warn("Unknown notification type: {}", message.getType());
-        }
+    switch (message.getType()) {
+      case EMAIL_VERIFICATION ->
+          emailService.sendVerificationEmail(message.getEmail(), message.getRawOtp());
+      case PASSWORD_RESET ->
+          emailService.sendPasswordResetEmail(message.getEmail(), message.getRawOtp());
+      default -> log.warn("Unknown notification type: {}", message.getType());
     }
+  }
 }

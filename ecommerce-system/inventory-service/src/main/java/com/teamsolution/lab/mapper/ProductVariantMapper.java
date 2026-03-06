@@ -6,10 +6,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring",
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(
+    componentModel = "spring",
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ProductVariantMapper extends BaseMapper<ProductVariant, ProductVariantDto> {
 
-    @Mapping(target = "inventory", source = "inventory")
-    ProductVariantDto toDto(ProductVariant entity);
+  @Mapping(target = "inventory", source = "inventory")
+  ProductVariantDto toDto(ProductVariant entity);
 }

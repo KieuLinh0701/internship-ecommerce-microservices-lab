@@ -29,48 +29,51 @@ public class GatewaySecurityConfig {
         .authorizeExchange(
             exchanges ->
                 exchanges
-                        // Public endpoints
+                    // Public endpoints
 
-                        // Auth public endpoints
-                        .pathMatchers(HttpMethod.POST,
-                                "/api/auth/login",
-                                "/api/auth/register",
-                                "/api/auth/refresh",
-                                "/api/auth/verify-email",
-                                "/api/auth/resend-verification-otp",
-                                "/api/auth/oauth2/google",
-                                "/api/auth/password-reset/send-otp",
-                                "/api/auth/password-reset/resend-otp",
-                                "/api/auth/password-reset/verify",
-                                "/api/auth/password-reset/reset"
-                        ).permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/auth/jwks").permitAll()
+                    // Auth public endpoints
+                    .pathMatchers(
+                        HttpMethod.POST,
+                        "/api/auth/login",
+                        "/api/auth/register",
+                        "/api/auth/refresh",
+                        "/api/auth/verify-email",
+                        "/api/auth/resend-verification-otp",
+                        "/api/auth/oauth2/google",
+                        "/api/auth/password-reset/send-otp",
+                        "/api/auth/password-reset/resend-otp",
+                        "/api/auth/password-reset/verify",
+                        "/api/auth/password-reset/reset")
+                    .permitAll()
+                    .pathMatchers(HttpMethod.GET, "/api/auth/jwks")
+                    .permitAll()
 
-                        // Inventory Public
-                        .pathMatchers(HttpMethod.GET, "/api/inventory/**").permitAll()
+                    // Inventory Public
+                    .pathMatchers(HttpMethod.GET, "/api/inventory/**")
+                    .permitAll()
 
-                        // OAuth2
-                        .pathMatchers("/login/oauth2/code/**",
-                                "/oauth2/**"
-                        ).permitAll()
+                    // OAuth2
+                    .pathMatchers("/login/oauth2/code/**", "/oauth2/**")
+                    .permitAll()
 
-                        // Swagger
-                        .pathMatchers(
-                            "/api/*/swagger-ui/**",
-                            "/api/*/swagger-ui.html",
-                            "/api/*/webjars/**",
-                            "/api/*/v3/api-docs/**",
-                            "/api/*/v3/api-docs",
-                            "/webjars/**",
-                            "/swagger-ui/**",
-                            "/swagger-ui.html",
-                            "/v3/api-docs/**"
-                        ).permitAll()
+                    // Swagger
+                    .pathMatchers(
+                        "/api/*/swagger-ui/**",
+                        "/api/*/swagger-ui.html",
+                        "/api/*/webjars/**",
+                        "/api/*/v3/api-docs/**",
+                        "/api/*/v3/api-docs",
+                        "/webjars/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**")
+                    .permitAll()
 
-                        // All other
-                        .anyExchange().authenticated())
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-            .oauth2Login(oauth2 -> oauth2.authenticationSuccessHandler(successHandler));
+                    // All other
+                    .anyExchange()
+                    .authenticated())
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+        .oauth2Login(oauth2 -> oauth2.authenticationSuccessHandler(successHandler));
 
     // CORS configuration for the frontend UI
     //        http.cors(cors -> cors.configurationSource(request -> {

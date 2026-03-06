@@ -19,33 +19,37 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final TrustedHeaderAuthFilter trustedHeaderAuthFilter;
+  private final TrustedHeaderAuthFilter trustedHeaderAuthFilter;
 
   // Default Security Filter Chain: Handles form login and basic authentication
   @Bean
   @Order(2)
   public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(
+        .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
             authorize ->
                 authorize
                     .requestMatchers(
-                            "/register",
-                            "/login",
-                            "/refresh",
-                            "/verify-email",
-                            "/jwks",
-                            "/resend-verification-otp",
-                            "/oauth2/google",
-                            "/password-reset/send-otp",
-                            "/password-reset/resend-otp",
-                            "/password-reset/verify",
-                            "/password-reset/reset",
-                            "/swagger-ui/**", "/swagger-ui.html",
-                            "/v3/api-docs/**", "/v3/api-docs").permitAll()
-                        .anyRequest().authenticated())
-            .addFilterBefore(trustedHeaderAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                        "/register",
+                        "/login",
+                        "/refresh",
+                        "/verify-email",
+                        "/jwks",
+                        "/resend-verification-otp",
+                        "/oauth2/google",
+                        "/password-reset/send-otp",
+                        "/password-reset/resend-otp",
+                        "/password-reset/verify",
+                        "/password-reset/reset",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
+                        "/v3/api-docs")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .addFilterBefore(trustedHeaderAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

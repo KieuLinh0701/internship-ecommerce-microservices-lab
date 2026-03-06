@@ -6,7 +6,6 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class BrandFilterRequest
-        extends BaseFilterRequest {
+public class BrandFilterRequest extends BaseFilterRequest {
   private String keyword;
 }

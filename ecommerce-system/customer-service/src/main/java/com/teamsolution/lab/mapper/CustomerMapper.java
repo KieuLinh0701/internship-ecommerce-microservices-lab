@@ -8,5 +8,4 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(
     componentModel = "spring",
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface CustomerMapper extends BaseMapper<Customer, CustomerDto> {
-}
+public interface CustomerMapper extends BaseMapper<Customer, CustomerDto> {}

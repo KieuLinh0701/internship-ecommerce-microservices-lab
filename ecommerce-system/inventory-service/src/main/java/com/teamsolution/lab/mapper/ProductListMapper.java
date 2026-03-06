@@ -9,32 +9,33 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring",
-        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(
+    componentModel = "spring",
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ProductListMapper extends BaseMapper<Product, ProductListDto> {
 
-    @Mapping(target = "thumbnail", expression = "java(extractThumbnail(entity))")
-    ProductListDto toDto(Product entity);
+  @Mapping(target = "thumbnail", expression = "java(extractThumbnail(entity))")
+  ProductListDto toDto(Product entity);
 
-    default String extractThumbnail(Product product) {
-        if (product.getImages() == null) return null;
-        return product.getImages().stream()
-                .filter(img -> Boolean.TRUE.equals(img.getIsThumbnail()))
-                .map(ProductImage::getImageUrl)
-                .findFirst()
-                .orElse(null);
-    }
+  default String extractThumbnail(Product product) {
+    if (product.getImages() == null) return null;
+    return product.getImages().stream()
+        .filter(img -> Boolean.TRUE.equals(img.getIsThumbnail()))
+        .map(ProductImage::getImageUrl)
+        .findFirst()
+        .orElse(null);
+  }
 
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "brand", ignore = true)
-    @Mapping(target = "variants", ignore = true)
-    @Mapping(target = "images", ignore = true)
-    Product toEntity(ProductListDto dto);
+  @Mapping(target = "category", ignore = true)
+  @Mapping(target = "brand", ignore = true)
+  @Mapping(target = "variants", ignore = true)
+  @Mapping(target = "images", ignore = true)
+  Product toEntity(ProductListDto dto);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "brand", ignore = true)
-    @Mapping(target = "variants", ignore = true)
-    @Mapping(target = "images", ignore = true)
-    void updateEntityFromDto(ProductListDto dto, @MappingTarget Product entity);
+  @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+  @Mapping(target = "category", ignore = true)
+  @Mapping(target = "brand", ignore = true)
+  @Mapping(target = "variants", ignore = true)
+  @Mapping(target = "images", ignore = true)
+  void updateEntityFromDto(ProductListDto dto, @MappingTarget Product entity);
 }

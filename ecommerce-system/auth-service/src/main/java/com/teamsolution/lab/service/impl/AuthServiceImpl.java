@@ -38,15 +38,14 @@ import com.teamsolution.lab.service.helper.AuthHelperService;
 import com.teamsolution.lab.service.helper.JwtTokenService;
 import com.teamsolution.lab.service.helper.RefreshTokenService;
 import jakarta.transaction.Transactional;
+import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Set;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -99,9 +98,11 @@ public class AuthServiceImpl implements AuthService {
             request.fullName(),
             request.phone());
 
-    notificationEventProducer.sendOtpEmail(request.email(), rawOtp, NotificationEventType.EMAIL_VERIFICATION);
+    notificationEventProducer.sendOtpEmail(
+        request.email(), rawOtp, NotificationEventType.EMAIL_VERIFICATION);
 
-    return new RegisterResponse(request.email(), otpSecurityProperties.getVerificationExpiresInSeconds());
+    return new RegisterResponse(
+        request.email(), otpSecurityProperties.getVerificationExpiresInSeconds());
   }
 
   @Override
@@ -114,20 +115,14 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public ResendVerificationOtpResponse resendVerificationOtp(
-          ResendVerificationOtpRequest request) {
+  public ResendVerificationOtpResponse resendVerificationOtp(ResendVerificationOtpRequest request) {
 
-      Account account = accountService.findByEmail(request.email());
+    Account account = accountService.findByEmail(request.email());
 
-      authHelperService.handleResendOtp(
-              account,
-              VerificationTokenType.EMAIL_VERIFICATION
-      );
+    authHelperService.handleResendOtp(account, VerificationTokenType.EMAIL_VERIFICATION);
 
-      return new ResendVerificationOtpResponse(
-              request.email(),
-              otpSecurityProperties.getVerificationExpiresInSeconds()
-      );
+    return new ResendVerificationOtpResponse(
+        request.email(), otpSecurityProperties.getVerificationExpiresInSeconds());
   }
 
   // Refresh token
@@ -136,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
   public AuthResponse refresh(String currentRole, RefreshRequest request) {
     RefreshToken storedToken = refreshTokenService.validateAndGet(request.refreshToken());
 
-      verifyTokenOwnership(storedToken, request.refreshToken());
+    verifyTokenOwnership(storedToken, request.refreshToken());
 
     storedToken.setUsed(true);
 
@@ -149,11 +144,7 @@ public class AuthServiceImpl implements AuthService {
 
     Set<String> roles = accountService.getActiveRoleNamesByAccountId(accountId);
 
-    return new ProfileResponse(
-        account.getId(),
-        account.getEmail(),
-        account.getStatus(),
-        roles);
+    return new ProfileResponse(account.getId(), account.getEmail(), account.getStatus(), roles);
   }
 
   @Override
@@ -168,22 +159,17 @@ public class AuthServiceImpl implements AuthService {
     return authHelperService.handleResetPassword(account);
   }
 
-    @Override
-    public ResendOtpPasswordResetResponse resendOtpPasswordReset(
-            ResendOtpPasswordResetRequest request) {
+  @Override
+  public ResendOtpPasswordResetResponse resendOtpPasswordReset(
+      ResendOtpPasswordResetRequest request) {
 
-        Account account = accountService.findByEmail(request.email());
+    Account account = accountService.findByEmail(request.email());
 
-        authHelperService.handleResendOtp(
-                account,
-                VerificationTokenType.PASSWORD_RESET
-        );
+    authHelperService.handleResendOtp(account, VerificationTokenType.PASSWORD_RESET);
 
-        return new ResendOtpPasswordResetResponse(
-                request.email(),
-                otpSecurityProperties.getVerificationExpiresInSeconds()
-        );
-    }
+    return new ResendOtpPasswordResetResponse(
+        request.email(), otpSecurityProperties.getVerificationExpiresInSeconds());
+  }
 
   @Override
   public VerifyPasswordResetResponse verifyResetPassword(VerifyPasswordResetRequest request) {

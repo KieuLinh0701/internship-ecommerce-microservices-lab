@@ -54,11 +54,11 @@ public class AuthExceptionHandler extends GlobalExceptionHandler {
 
   @ExceptionHandler(MaxResendOtpExceededException.class)
   public ResponseEntity<ApiResponse> handleMaxResendOtpExceeded(MaxResendOtpExceededException ex) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.failure(ex.getMessage()));
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.failure(ex.getMessage()));
   }
 
   @ExceptionHandler(OtpCooldownException.class)
   public ResponseEntity<ApiResponse> handleOtpCooldown(OtpCooldownException ex) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.failure(ex.getMessage()));
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.failure(ex.getMessage()));
   }
 }

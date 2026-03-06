@@ -1,5 +1,6 @@
 package com.teamsolution.lab.document;
 
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,8 +10,6 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import java.time.LocalDate;
-
 @Document(indexName = "products")
 @Data
 @NoArgsConstructor
@@ -18,38 +17,35 @@ import java.time.LocalDate;
 @Builder
 public class ProductDocument {
 
-    @Id
-    private String id;
+  @Id private String id;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
-    private String name;
+  @Field(type = FieldType.Text, analyzer = "standard")
+  private String name;
 
-    @Field(type = FieldType.Text, analyzer = "standard")
-    private String description;
+  @Field(type = FieldType.Text, analyzer = "standard")
+  private String description;
 
-    @Field(type = FieldType.Keyword)
-    private String slug;
+  @Field(type = FieldType.Keyword)
+  private String slug;
 
-    @Field(type = FieldType.Keyword)
-    private String categorySlug;
+  @Field(type = FieldType.Keyword)
+  private String categorySlug;
 
-    @Field(type = FieldType.Keyword)
-    private String brandSlug;
+  @Field(type = FieldType.Keyword)
+  private String brandSlug;
 
-    @Field(type = FieldType.Long)
-    private Long basePrice;
+  @Field(type = FieldType.Long)
+  private Long basePrice;
 
-    @Field(type = FieldType.Keyword)
-    private String status;
+  @Field(type = FieldType.Keyword)
+  private String status;
 
-    @Field(type = FieldType.Keyword)
-    private String thumbnail;
+  @Field(type = FieldType.Keyword)
+  private String thumbnail;
 
-    @Field(type = FieldType.Boolean)
-    private Boolean isDelete;
+  @Field(type = FieldType.Boolean)
+  private Boolean isDelete;
 
-    @Field(
-            type = FieldType.Date
-    )
-    private LocalDate createdAt;
+  @Field(type = FieldType.Date)
+  private LocalDate createdAt;
 }

@@ -5,11 +5,10 @@ import com.teamsolution.lab.entity.Category;
 import com.teamsolution.lab.exception.ResourceNotFoundException;
 import com.teamsolution.lab.repository.CategoryRepository;
 import com.teamsolution.lab.service.CategoryService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

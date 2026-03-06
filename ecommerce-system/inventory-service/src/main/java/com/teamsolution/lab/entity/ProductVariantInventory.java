@@ -6,16 +6,15 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.UUID;
 
 @Entity
 @Table(name = "product_variant_inventory")
@@ -61,7 +60,7 @@ public class ProductVariantInventory extends BaseEntity {
     return ChronoUnit.DAYS.between(LocalDate.now(), expiryDate);
   }
 
-    public UUID getVariantId() {
-        return variant != null ? variant.getId() : null;
-    }
+  public UUID getVariantId() {
+    return variant != null ? variant.getId() : null;
+  }
 }

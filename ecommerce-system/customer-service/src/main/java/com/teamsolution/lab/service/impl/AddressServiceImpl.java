@@ -13,11 +13,10 @@ import com.teamsolution.lab.repository.AddressRepository;
 import com.teamsolution.lab.service.AddressService;
 import com.teamsolution.lab.service.CustomerService;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -42,12 +41,12 @@ public class AddressServiceImpl implements AddressService {
   public AddressDto addAddress(UUID accountId, AddressAddRequest request) {
     Customer customer = customerService.findByAccountId(accountId);
 
-      long count = addressRepository.countByCustomerIdAndIsDeleteFalse(customer.getId());
-      boolean shouldBeDefault = request.isDefault() || count == 0;
+    long count = addressRepository.countByCustomerIdAndIsDeleteFalse(customer.getId());
+    boolean shouldBeDefault = request.isDefault() || count == 0;
 
-      if (shouldBeDefault) {
-          addressRepository.unsetDefaultByCustomerId(customer.getId());
-      }
+    if (shouldBeDefault) {
+      addressRepository.unsetDefaultByCustomerId(customer.getId());
+    }
 
     Address address =
         Address.builder()
@@ -137,8 +136,7 @@ public class AddressServiceImpl implements AddressService {
 
   private void assertOwnership(Address address, Customer customer) {
     if (!address.getCustomer().getId().equals(customer.getId())) {
-      throw new AddressAccessDeniedException(
-          "You do not have permission to access this address");
+      throw new AddressAccessDeniedException("You do not have permission to access this address");
     }
   }
 }

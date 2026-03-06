@@ -7,9 +7,8 @@ import com.teamsolution.lab.exception.ResourceNotFoundException;
 import com.teamsolution.lab.mapper.CustomerMapper;
 import com.teamsolution.lab.repository.CustomerRepository;
 import com.teamsolution.lab.service.CustomerService;
-import org.springframework.stereotype.Service;
-
 import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 @Service
 public class CustomerServiceImpl extends BaseServiceImpl<Customer, CustomerDto, UUID>
