@@ -21,26 +21,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class BrandController {
 
-    private final BrandService brandService;
+  private final BrandService brandService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<BrandListDto>>> getActiveBrands(
-            BrandFilterRequest filterRequest) {
+  @GetMapping
+  public ResponseEntity<ApiResponse<PageResponse<BrandListDto>>> getActiveBrands(
+      BrandFilterRequest filterRequest) {
 
-        Pageable pageable = PageableUtils.toPageable(
-                filterRequest.getPage(),
-                filterRequest.getSize(),
-                filterRequest.getSortBy(),
-                filterRequest.getDirection());
+    Pageable pageable =
+        PageableUtils.toPageable(
+            filterRequest.getPage(),
+            filterRequest.getSize(),
+            filterRequest.getSortBy(),
+            filterRequest.getDirection());
 
-        Page<BrandListDto> brands = brandService.getActiveBrands(pageable, filterRequest);
-        return ResponseEntity.ok(ApiResponse.success(PageResponse.from(brands)));
-    }
+    Page<BrandListDto> brands = brandService.getActiveBrands(pageable, filterRequest);
+    return ResponseEntity.ok(ApiResponse.success(PageResponse.from(brands)));
+  }
 
-    @GetMapping("/{slug}")
-    public ResponseEntity<ApiResponse<BrandDto>> getActiveBrandBySlug(@PathVariable String slug) {
+  @GetMapping("/{slug}")
+  public ResponseEntity<ApiResponse<BrandDto>> getActiveBrandBySlug(@PathVariable String slug) {
 
-        BrandDto brand = brandService.getActiveBrandBySlug(slug);
-        return ResponseEntity.ok(ApiResponse.success(brand));
-    }
+    BrandDto brand = brandService.getActiveBrandBySlug(slug);
+    return ResponseEntity.ok(ApiResponse.success(brand));
+  }
 }

@@ -8,6 +8,7 @@ import com.teamsolution.lab.response.ApiResponse;
 import com.teamsolution.lab.response.PageResponse;
 import com.teamsolution.lab.service.ProductService;
 import com.teamsolution.lab.util.PageableUtils;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,8 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,7 +28,8 @@ public class ProductController {
   @GetMapping
   public ResponseEntity<ApiResponse<PageResponse<ProductListDto>>> getProducts(
       ProductFilterRequest filterRequest) {
-    Pageable pageable = PageableUtils.toPageable(
+    Pageable pageable =
+        PageableUtils.toPageable(
             filterRequest.getPage(),
             filterRequest.getSize(),
             filterRequest.getSortBy(),
@@ -40,20 +40,16 @@ public class ProductController {
   }
 
   @GetMapping("/{slug}")
-  public ResponseEntity<ApiResponse<ProductDetailDto>> getBySlug(
-          @PathVariable String slug
-  ) {
-      ProductDetailDto product = productService.getProductBySlug(slug);
+  public ResponseEntity<ApiResponse<ProductDetailDto>> getBySlug(@PathVariable String slug) {
+    ProductDetailDto product = productService.getProductBySlug(slug);
     return ResponseEntity.ok(ApiResponse.success(product));
   }
 
-    @GetMapping("/{productId}/variants/{variantId}")
-    public ResponseEntity<ApiResponse<ProductVariantDto>> getVariantById(
-            @PathVariable UUID productId,
-            @PathVariable UUID variantId
-    ) {
+  @GetMapping("/{productId}/variants/{variantId}")
+  public ResponseEntity<ApiResponse<ProductVariantDto>> getVariantById(
+      @PathVariable UUID productId, @PathVariable UUID variantId) {
 
-        ProductVariantDto variant = productService.getVariantById(productId, variantId);
-        return ResponseEntity.ok(ApiResponse.success(variant));
-    }
+    ProductVariantDto variant = productService.getVariantById(productId, variantId);
+    return ResponseEntity.ok(ApiResponse.success(variant));
+  }
 }

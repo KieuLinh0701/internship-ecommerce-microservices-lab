@@ -9,14 +9,13 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(
     componentModel = "spring",
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface BrandListMapper
-        extends BaseMapper<Brand, BrandListDto> {
-    @Override
-    BrandListDto toDto(Brand entity);
+public interface BrandListMapper extends BaseMapper<Brand, BrandListDto> {
+  @Override
+  BrandListDto toDto(Brand entity);
 
-    @Override
-    Brand toEntity(BrandListDto dto);
+  @Override
+  Brand toEntity(BrandListDto dto);
 
-    @Override
-    void updateEntityFromDto(BrandListDto dto, @MappingTarget Brand entity);
+  @Override
+  void updateEntityFromDto(BrandListDto dto, @MappingTarget Brand entity);
 }

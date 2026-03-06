@@ -8,8 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface BrandService {
 
-    Page<BrandListDto> getActiveBrands(Pageable pageable, BrandFilterRequest request);
+  Page<BrandListDto> getActiveBrands(Pageable pageable, BrandFilterRequest request);
 
-    BrandDto getActiveBrandBySlug(String slug);
-
+  BrandDto getActiveBrandBySlug(String slug);
 }

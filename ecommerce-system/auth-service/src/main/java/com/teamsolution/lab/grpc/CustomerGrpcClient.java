@@ -4,10 +4,9 @@ import com.teamsolution.lab.grpc.customer.CreateRequest;
 import com.teamsolution.lab.grpc.customer.CustomerServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor

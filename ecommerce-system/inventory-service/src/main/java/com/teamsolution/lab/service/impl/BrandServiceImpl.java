@@ -19,27 +19,31 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BrandServiceImpl implements BrandService {
 
-    private final BrandRepository brandRepository;
-    private final BrandListMapper brandListMapper;
-    private final BrandMapper brandMapper;
+  private final BrandRepository brandRepository;
+  private final BrandListMapper brandListMapper;
+  private final BrandMapper brandMapper;
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<BrandListDto> getActiveBrands(Pageable pageable, BrandFilterRequest request) {
-        boolean hasKeyword = request.getKeyword() != null && !request.getKeyword().isBlank();
+  @Override
+  @Transactional(readOnly = true)
+  public Page<BrandListDto> getActiveBrands(Pageable pageable, BrandFilterRequest request) {
+    boolean hasKeyword = request.getKeyword() != null && !request.getKeyword().isBlank();
 
-        Page<Brand> brands = hasKeyword
-                ? brandRepository.findByIsDeleteFalseAndStatusIsTrueAndNameContainingIgnoreCase(request.getKeyword(), pageable)
-                : brandRepository.findByIsDeleteFalseAndStatusIsTrue(pageable);
+    Page<Brand> brands =
+        hasKeyword
+            ? brandRepository.findByIsDeleteFalseAndStatusIsTrueAndNameContainingIgnoreCase(
+                request.getKeyword(), pageable)
+            : brandRepository.findByIsDeleteFalseAndStatusIsTrue(pageable);
 
-        return brands.map(brandListMapper::toDto);
-    }
+    return brands.map(brandListMapper::toDto);
+  }
 
-    @Override
-    @Transactional(readOnly = true)
-    public BrandDto getActiveBrandBySlug(String slug) {
-        Brand brand = brandRepository.findByIsDeleteFalseAndStatusIsTrueAndSlug(slug)
-                .orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
-        return brandMapper.toDto(brand);
-    }
+  @Override
+  @Transactional(readOnly = true)
+  public BrandDto getActiveBrandBySlug(String slug) {
+    Brand brand =
+        brandRepository
+            .findByIsDeleteFalseAndStatusIsTrueAndSlug(slug)
+            .orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+    return brandMapper.toDto(brand);
+  }
 }

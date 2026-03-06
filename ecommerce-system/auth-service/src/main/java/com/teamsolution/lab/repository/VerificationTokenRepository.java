@@ -3,12 +3,11 @@ package com.teamsolution.lab.repository;
 import com.teamsolution.lab.entity.VerificationToken;
 import com.teamsolution.lab.enums.VerificationTokenType;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Optional;
-import java.util.UUID;
 
 public interface VerificationTokenRepository extends BaseRepository<VerificationToken, UUID> {
   @Modifying
@@ -21,13 +20,12 @@ public interface VerificationTokenRepository extends BaseRepository<Verification
   Optional<VerificationToken> findByAccountIdAndTokenAndTypeAndIsUsedFalse(
       UUID accountId, String token, VerificationTokenType type);
 
-  @Query("""
+  @Query(
+      """
              SELECT v FROM VerificationToken v
              WHERE v.account.id = :accountId
              AND v.type = :type
                 AND v.isUsed = false
           """)
-    Optional<VerificationToken> findActiveToken(
-            UUID accountId,
-            VerificationTokenType type);
+  Optional<VerificationToken> findActiveToken(UUID accountId, VerificationTokenType type);
 }

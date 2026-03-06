@@ -20,41 +20,41 @@ import com.teamsolution.lab.dto.response.ResendOtpPasswordResetResponse;
 import com.teamsolution.lab.dto.response.ResendVerificationOtpResponse;
 import com.teamsolution.lab.dto.response.SendOtpResetPasswordResponse;
 import com.teamsolution.lab.dto.response.VerifyPasswordResetResponse;
-
 import java.util.UUID;
 
 public interface AuthService {
-    // login
-    public LoginResponse login(LoginRequest request);
+  // login
+  public LoginResponse login(LoginRequest request);
 
-    // login with Google
-    public AuthResponse loginWithGoogle(GoogleLoginRequest request);
+  // login with Google
+  public AuthResponse loginWithGoogle(GoogleLoginRequest request);
 
-    // register
-    public RegisterResponse register(RegisterRequest request);
+  // register
+  public RegisterResponse register(RegisterRequest request);
 
-    // verify email
-    public void verifyEmail(VerifyEmailRequest request);
+  // verify email
+  public void verifyEmail(VerifyEmailRequest request);
 
-    // resend verification otp
-    public ResendVerificationOtpResponse resendVerificationOtp(ResendVerificationOtpRequest request);
+  // resend verification otp
+  public ResendVerificationOtpResponse resendVerificationOtp(ResendVerificationOtpRequest request);
 
-    // refresh token
-    public AuthResponse refresh(String currentRole, RefreshRequest request);
+  // refresh token
+  public AuthResponse refresh(String currentRole, RefreshRequest request);
 
-    // get profile
-    public ProfileResponse getMe(UUID accountId);
+  // get profile
+  public ProfileResponse getMe(UUID accountId);
 
-    // switch role
-    public AuthResponse switchRole(UUID accountId, SwitchRoleRequest request);
+  // switch role
+  public AuthResponse switchRole(UUID accountId, SwitchRoleRequest request);
 
-    public SendOtpResetPasswordResponse sendOtpResetPassword(SendOtpResetPasswordRequest request);
+  public SendOtpResetPasswordResponse sendOtpResetPassword(SendOtpResetPasswordRequest request);
 
-    public ResendOtpPasswordResetResponse resendOtpPasswordReset(ResendOtpPasswordResetRequest request);
+  public ResendOtpPasswordResetResponse resendOtpPasswordReset(
+      ResendOtpPasswordResetRequest request);
 
-    public VerifyPasswordResetResponse verifyResetPassword(VerifyPasswordResetRequest request);
+  public VerifyPasswordResetResponse verifyResetPassword(VerifyPasswordResetRequest request);
 
-    public void resetPassword(ResetPasswordRequest request);
+  public void resetPassword(ResetPasswordRequest request);
 
-    public void changePassword(UUID accountId, ChangePasswordRequest request);
+  public void changePassword(UUID accountId, ChangePasswordRequest request);
 }

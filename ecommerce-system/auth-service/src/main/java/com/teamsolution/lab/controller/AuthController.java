@@ -25,6 +25,7 @@ import com.teamsolution.lab.response.ApiResponse;
 import com.teamsolution.lab.security.SecurityUtils;
 import com.teamsolution.lab.service.AuthService;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,8 +34,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping
@@ -47,24 +46,24 @@ public class AuthController {
   public ResponseEntity<ApiResponse<LoginResponse>> login(
       @Valid @RequestBody LoginRequest request) {
 
-      LoginResponse response = authService.login(request);
-      return ResponseEntity.ok(ApiResponse.success(response));
+    LoginResponse response = authService.login(request);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/oauth2/google")
   public ResponseEntity<ApiResponse<AuthResponse>> loginWithGoogle(
       @Valid @RequestBody GoogleLoginRequest request) {
 
-      AuthResponse response = authService.loginWithGoogle(request);
-      return ResponseEntity.ok(ApiResponse.success(response));
+    AuthResponse response = authService.loginWithGoogle(request);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/register")
   public ResponseEntity<ApiResponse<RegisterResponse>> register(
       @Valid @RequestBody RegisterRequest request) {
 
-      RegisterResponse response = authService.register(request);
-      return ResponseEntity.ok(
+    RegisterResponse response = authService.register(request);
+    return ResponseEntity.ok(
         ApiResponse.success(
             "Registration was successful. Please check your email to verify your account.",
             response));
@@ -72,68 +71,67 @@ public class AuthController {
 
   @PostMapping("/verify-email")
   public ResponseEntity<ApiResponse<Void>> verifyEmail(
-            @Valid @RequestBody VerifyEmailRequest request) {
+      @Valid @RequestBody VerifyEmailRequest request) {
 
-      authService.verifyEmail(request);
-      return ResponseEntity.ok(ApiResponse.success(null));
+    authService.verifyEmail(request);
+    return ResponseEntity.ok(ApiResponse.success(null));
   }
 
   @PostMapping("/resend-verification-otp")
   public ResponseEntity<ApiResponse<ResendVerificationOtpResponse>> resendVerificationOtp(
-            @Valid @RequestBody ResendVerificationOtpRequest request) {
+      @Valid @RequestBody ResendVerificationOtpRequest request) {
 
-      ResendVerificationOtpResponse response = authService.resendVerificationOtp(request);
-      return ResponseEntity.ok(ApiResponse.success(response));
+    ResendVerificationOtpResponse response = authService.resendVerificationOtp(request);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/refresh")
-  public ResponseEntity<ApiResponse<AuthResponse>> refresh(
-          @RequestBody RefreshRequest request) {
+  public ResponseEntity<ApiResponse<AuthResponse>> refresh(@RequestBody RefreshRequest request) {
 
-      String currentRole = SecurityUtils.getCurrentRole();
+    String currentRole = SecurityUtils.getCurrentRole();
 
-      AuthResponse response = authService.refresh(currentRole, request);
-      return ResponseEntity.ok(ApiResponse.success(response));
+    AuthResponse response = authService.refresh(currentRole, request);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @GetMapping("/me")
   public ResponseEntity<ApiResponse<ProfileResponse>> getMe() {
 
-      UUID accountId = SecurityUtils.getCurrentAccountId();
+    UUID accountId = SecurityUtils.getCurrentAccountId();
 
-      ProfileResponse response = authService.getMe(accountId);
-      return ResponseEntity.ok(ApiResponse.success(response));
+    ProfileResponse response = authService.getMe(accountId);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/switch-role")
   public ResponseEntity<ApiResponse<AuthResponse>> switchRole(
       @Valid @RequestBody SwitchRoleRequest request) {
 
-      UUID accountId = SecurityUtils.getCurrentAccountId();
-      String currentRole = SecurityUtils.getCurrentRole();
+    UUID accountId = SecurityUtils.getCurrentAccountId();
+    String currentRole = SecurityUtils.getCurrentRole();
 
-      if (currentRole.equals(request.role())) {
-          throw new SameRoleException("Already using this role");
-      }
+    if (currentRole.equals(request.role())) {
+      throw new SameRoleException("Already using this role");
+    }
 
-      AuthResponse response = authService.switchRole(accountId, request);
-      return ResponseEntity.ok(ApiResponse.success(response));
+    AuthResponse response = authService.switchRole(accountId, request);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/password-reset/send-otp")
   public ResponseEntity<ApiResponse<SendOtpResetPasswordResponse>> sendOtpResetPassword(
       @Valid @RequestBody SendOtpResetPasswordRequest request) {
 
-      SendOtpResetPasswordResponse response = authService.sendOtpResetPassword(request);
-      return ResponseEntity.ok(ApiResponse.success(response));
+    SendOtpResetPasswordResponse response = authService.sendOtpResetPassword(request);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/password-reset/resend-otp")
   public ResponseEntity<ApiResponse<ResendOtpPasswordResetResponse>> resendOtpResetPassword(
-          @Valid @RequestBody ResendOtpPasswordResetRequest request) {
+      @Valid @RequestBody ResendOtpPasswordResetRequest request) {
 
-      ResendOtpPasswordResetResponse response = authService.resendOtpPasswordReset(request);
-      return ResponseEntity.ok(ApiResponse.success(response));
+    ResendOtpPasswordResetResponse response = authService.resendOtpPasswordReset(request);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/password-reset/verify")
@@ -154,11 +152,11 @@ public class AuthController {
 
   @PutMapping("/change-password")
   public ResponseEntity<ApiResponse<Void>> changePassword(
-          @Valid @RequestBody ChangePasswordRequest request) {
+      @Valid @RequestBody ChangePasswordRequest request) {
 
-      UUID accountId = SecurityUtils.getCurrentAccountId();
+    UUID accountId = SecurityUtils.getCurrentAccountId();
 
-      authService.changePassword(accountId, request);
-      return ResponseEntity.ok(ApiResponse.success(null));
+    authService.changePassword(accountId, request);
+    return ResponseEntity.ok(ApiResponse.success(null));
   }
 }

@@ -8,11 +8,10 @@ import com.teamsolution.lab.exception.ResourceNotFoundException;
 import com.teamsolution.lab.repository.RefreshTokenRepository;
 import com.teamsolution.lab.util.OtpUtils;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

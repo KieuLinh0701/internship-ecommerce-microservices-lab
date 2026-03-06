@@ -4,11 +4,10 @@ import com.teamsolution.lab.entity.ProductVariant;
 import com.teamsolution.lab.exception.ResourceNotFoundException;
 import com.teamsolution.lab.repository.ProductVariantRepository;
 import com.teamsolution.lab.service.ProductVariantService;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @Transactional
@@ -18,7 +17,8 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
   @Override
   public ProductVariant findByIdAndProductId(UUID productId, UUID variantId) {
-      return productVariantRepository.findByIdAndProductIdAndIsDeleteFalse(variantId, productId)
-              .orElseThrow(() -> new ResourceNotFoundException("Product variant not found"));
+    return productVariantRepository
+        .findByIdAndProductIdAndIsDeleteFalse(variantId, productId)
+        .orElseThrow(() -> new ResourceNotFoundException("Product variant not found"));
   }
 }

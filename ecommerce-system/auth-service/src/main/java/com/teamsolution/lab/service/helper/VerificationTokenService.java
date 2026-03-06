@@ -9,18 +9,17 @@ import com.teamsolution.lab.exception.ResourceNotFoundException;
 import com.teamsolution.lab.repository.VerificationTokenRepository;
 import com.teamsolution.lab.util.OtpUtils;
 import com.teamsolution.lab.util.UuidGenerator;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class VerificationTokenService {
 
-    private final OtpSecurityProperties otpSecurityProperties;
+  private final OtpSecurityProperties otpSecurityProperties;
   private final VerificationTokenRepository verificationTokenRepository;
 
   public String generateAndSave(Account account, VerificationTokenType type) {
@@ -35,7 +34,9 @@ public class VerificationTokenService {
             .account(account)
             .token(OtpUtils.hashOtp(rawOtp))
             .type(type)
-            .expiresAt(LocalDateTime.now().plusSeconds(otpSecurityProperties.getVerificationExpiresInSeconds()))
+            .expiresAt(
+                LocalDateTime.now()
+                    .plusSeconds(otpSecurityProperties.getVerificationExpiresInSeconds()))
             .isUsed(false)
             .build();
 
@@ -60,16 +61,17 @@ public class VerificationTokenService {
   }
 
   public VerificationToken findActiveToken(UUID accountId, VerificationTokenType type) {
-      return verificationTokenRepository.findActiveToken(accountId, type)
-              .orElseThrow(() ->
-                      new ResourceNotFoundException(
-                              "No active " + type.name().toLowerCase().replace("_", " ")
-                                      + " request found."
-                      )
-              );
+    return verificationTokenRepository
+        .findActiveToken(accountId, type)
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "No active "
+                        + type.name().toLowerCase().replace("_", " ")
+                        + " request found."));
   }
 
   public void save(VerificationToken token) {
-      verificationTokenRepository.save(token);
+    verificationTokenRepository.save(token);
   }
 }

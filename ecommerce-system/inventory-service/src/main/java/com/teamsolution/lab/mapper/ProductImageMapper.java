@@ -10,12 +10,12 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
     componentModel = "spring",
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface ProductImageMapper extends BaseMapper<ProductImage, ProductImageDto> {
-    @Override
-    ProductImageDto toDto(ProductImage entity);
+  @Override
+  ProductImageDto toDto(ProductImage entity);
 
-    @Override
-    ProductImage toEntity(ProductImageDto dto);
+  @Override
+  ProductImage toEntity(ProductImageDto dto);
 
-    @Override
-    void updateEntityFromDto(ProductImageDto dto, @MappingTarget ProductImage entity);
+  @Override
+  void updateEntityFromDto(ProductImageDto dto, @MappingTarget ProductImage entity);
 }
