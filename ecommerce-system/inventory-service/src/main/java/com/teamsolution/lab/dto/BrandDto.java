@@ -1,11 +1,11 @@
 package com.teamsolution.lab.dto;
 
-import java.util.List;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +16,5 @@ public class BrandDto {
   private String name;
   private String slug;
   private String logoUrl;
-  private boolean status;
   private String description;
-  private List<ProductListDto> products;
 }

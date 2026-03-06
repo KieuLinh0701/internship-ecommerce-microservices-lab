@@ -1,0 +1,3 @@
+ALTER TABLE verification_tokens
+ADD COLUMN resend_count INT NOT NULL DEFAULT 0,
+ADD COLUMN last_sent_at TIMESTAMP NOT NULL DEFAULT NOW()

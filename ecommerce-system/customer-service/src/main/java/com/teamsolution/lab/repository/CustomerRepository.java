@@ -6,4 +6,5 @@ import java.util.UUID;
 
 public interface CustomerRepository extends BaseRepository<Customer, UUID> {
   Optional<Customer> findByAccountId(UUID accountId);
+  boolean existsByAccountId(UUID accountId);
 }

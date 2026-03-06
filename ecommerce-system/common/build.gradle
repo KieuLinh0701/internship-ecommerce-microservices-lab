@@ -24,11 +24,14 @@ dependencies {
     api 'io.grpc:grpc-netty-shaded:1.68.0'    // Network transport layer for gRPC
     api 'io.grpc:grpc-protobuf:1.68.0'        // Protobuf serialization support
     api 'io.grpc:grpc-stub:1.68.0'            // Generated stub classes for client/server
-    api 'net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE'
-    api 'net.devh:grpc-client-spring-boot-starter:3.1.0.RELEASE'
+    compileOnly 'net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE'
+    compileOnly 'net.devh:grpc-client-spring-boot-starter:3.1.0.RELEASE'
 
     // Eureka Client — service discovery for gRPC target resolution
     api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    // Spring Security: Required for TrustedHeaderAuthFilter and SecurityUtils
+    api 'org.springframework.boot:spring-boot-starter-security'
 
     // Required for generated gRPC code — javax.annotation.Generated
     compileOnly 'org.apache.tomcat:annotations-api:6.0.53'

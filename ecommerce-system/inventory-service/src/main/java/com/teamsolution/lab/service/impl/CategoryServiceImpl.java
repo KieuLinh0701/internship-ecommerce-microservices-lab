@@ -3,27 +3,18 @@ package com.teamsolution.lab.service.impl;
 import com.teamsolution.lab.dto.CategoryDto;
 import com.teamsolution.lab.entity.Category;
 import com.teamsolution.lab.exception.ResourceNotFoundException;
-import com.teamsolution.lab.mapper.CategoryMapper;
 import com.teamsolution.lab.repository.CategoryRepository;
 import com.teamsolution.lab.service.CategoryService;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@Transactional
-public class CategoryServiceImpl extends BaseServiceImpl<Category, CategoryDto, UUID>
-    implements CategoryService {
-  private final CategoryRepository categoryRepository;
-  private final CategoryMapper categoryMapper;
+import java.util.List;
 
-  public CategoryServiceImpl(CategoryRepository categoryRepository, CategoryMapper categoryMapper) {
-    super(categoryRepository, categoryMapper);
-    this.categoryRepository = categoryRepository;
-    this.categoryMapper = categoryMapper;
-  }
+@Service
+@RequiredArgsConstructor
+public class CategoryServiceImpl implements CategoryService {
+  private final CategoryRepository categoryRepository;
 
   @Override
   @Transactional(readOnly = true)
@@ -34,11 +25,12 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category, CategoryDto, 
   }
 
   @Override
+  @Transactional(readOnly = true)
   public CategoryDto getActiveCategoryBySlug(String slug) {
     Category category =
         categoryRepository
             .findByIsDeleteFalseAndSlug(slug)
-            .orElseThrow(() -> new ResourceNotFoundException("Category not found or deleted"));
+            .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
     return mapToTree(category);
   }
@@ -48,7 +40,7 @@ public class CategoryServiceImpl extends BaseServiceImpl<Category, CategoryDto, 
         category.getChildren().stream()
             .filter(child -> !child.getIsDelete())
             .map(this::mapToTree)
-            .collect(Collectors.toList());
+            .toList();
 
     return CategoryDto.builder()
         .id(category.getId())

@@ -5,6 +5,8 @@ import com.teamsolution.lab.dto.request.GoogleLoginRequest;
 import com.teamsolution.lab.dto.request.LoginRequest;
 import com.teamsolution.lab.dto.request.RefreshRequest;
 import com.teamsolution.lab.dto.request.RegisterRequest;
+import com.teamsolution.lab.dto.request.ResendOtpPasswordResetRequest;
+import com.teamsolution.lab.dto.request.ResendVerificationOtpRequest;
 import com.teamsolution.lab.dto.request.ResetPasswordRequest;
 import com.teamsolution.lab.dto.request.SendOtpResetPasswordRequest;
 import com.teamsolution.lab.dto.request.SwitchRoleRequest;
@@ -14,21 +16,25 @@ import com.teamsolution.lab.dto.response.AuthResponse;
 import com.teamsolution.lab.dto.response.LoginResponse;
 import com.teamsolution.lab.dto.response.ProfileResponse;
 import com.teamsolution.lab.dto.response.RegisterResponse;
+import com.teamsolution.lab.dto.response.ResendOtpPasswordResetResponse;
+import com.teamsolution.lab.dto.response.ResendVerificationOtpResponse;
 import com.teamsolution.lab.dto.response.SendOtpResetPasswordResponse;
 import com.teamsolution.lab.dto.response.VerifyPasswordResetResponse;
 import com.teamsolution.lab.exception.SameRoleException;
 import com.teamsolution.lab.response.ApiResponse;
+import com.teamsolution.lab.security.SecurityUtils;
 import com.teamsolution.lab.service.AuthService;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping
@@ -37,72 +43,97 @@ public class AuthController {
 
   private final AuthService authService;
 
-  // Login
   @PostMapping("/login")
   public ResponseEntity<ApiResponse<LoginResponse>> login(
       @Valid @RequestBody LoginRequest request) {
-    return ResponseEntity.ok(ApiResponse.success(authService.login(request)));
+
+      LoginResponse response = authService.login(request);
+      return ResponseEntity.ok(ApiResponse.success(response));
   }
 
-  // Login with Google
   @PostMapping("/oauth2/google")
   public ResponseEntity<ApiResponse<AuthResponse>> loginWithGoogle(
       @Valid @RequestBody GoogleLoginRequest request) {
-    return ResponseEntity.ok(ApiResponse.success(authService.loginWithGoogle(request)));
+
+      AuthResponse response = authService.loginWithGoogle(request);
+      return ResponseEntity.ok(ApiResponse.success(response));
   }
 
-  // Register
   @PostMapping("/register")
   public ResponseEntity<ApiResponse<RegisterResponse>> register(
       @Valid @RequestBody RegisterRequest request) {
-    return ResponseEntity.ok(
+
+      RegisterResponse response = authService.register(request);
+      return ResponseEntity.ok(
         ApiResponse.success(
             "Registration was successful. Please check your email to verify your account.",
-            authService.register(request)));
+            response));
   }
 
   @PostMapping("/verify-email")
   public ResponseEntity<ApiResponse<Void>> verifyEmail(
-      @Valid @RequestBody VerifyEmailRequest request) {
-    authService.verifyEmail(request);
-    return ResponseEntity.ok(ApiResponse.success(null));
+            @Valid @RequestBody VerifyEmailRequest request) {
+
+      authService.verifyEmail(request);
+      return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-  // Refresh token
+  @PostMapping("/resend-verification-otp")
+  public ResponseEntity<ApiResponse<ResendVerificationOtpResponse>> resendVerificationOtp(
+            @Valid @RequestBody ResendVerificationOtpRequest request) {
+
+      ResendVerificationOtpResponse response = authService.resendVerificationOtp(request);
+      return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
   @PostMapping("/refresh")
   public ResponseEntity<ApiResponse<AuthResponse>> refresh(
-      @RequestHeader("X-Role") String currentRole, @RequestBody RefreshRequest request) {
-    return ResponseEntity.ok(ApiResponse.success(authService.refresh(currentRole, request)));
+          @RequestBody RefreshRequest request) {
+
+      String currentRole = SecurityUtils.getCurrentRole();
+
+      AuthResponse response = authService.refresh(currentRole, request);
+      return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @GetMapping("/me")
-  public ResponseEntity<ApiResponse<ProfileResponse>> getMe(
-      @RequestHeader("X-Account-Id") String accountId) {
+  public ResponseEntity<ApiResponse<ProfileResponse>> getMe() {
 
-    ProfileResponse profileResponse = authService.getMe(UUID.fromString(accountId));
-    return ResponseEntity.ok(ApiResponse.success(profileResponse));
+      UUID accountId = SecurityUtils.getCurrentAccountId();
+
+      ProfileResponse response = authService.getMe(accountId);
+      return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/switch-role")
   public ResponseEntity<ApiResponse<AuthResponse>> switchRole(
-      @RequestHeader("X-Account-Id") String accountId,
-      @RequestHeader("X-Role") String currentRole,
       @Valid @RequestBody SwitchRoleRequest request) {
 
-    if (currentRole.equals(request.role())) {
-      throw new SameRoleException("Already using this role");
-    }
+      UUID accountId = SecurityUtils.getCurrentAccountId();
+      String currentRole = SecurityUtils.getCurrentRole();
 
-    AuthResponse response = authService.switchRole(UUID.fromString(accountId), request);
-    return ResponseEntity.ok(ApiResponse.success(response));
+      if (currentRole.equals(request.role())) {
+          throw new SameRoleException("Already using this role");
+      }
+
+      AuthResponse response = authService.switchRole(accountId, request);
+      return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/password-reset/send-otp")
   public ResponseEntity<ApiResponse<SendOtpResetPasswordResponse>> sendOtpResetPassword(
       @Valid @RequestBody SendOtpResetPasswordRequest request) {
 
-    SendOtpResetPasswordResponse response = authService.sendOtpResetPassword(request);
-    return ResponseEntity.ok(ApiResponse.success(response));
+      SendOtpResetPasswordResponse response = authService.sendOtpResetPassword(request);
+      return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @PostMapping("/password-reset/resend-otp")
+  public ResponseEntity<ApiResponse<ResendOtpPasswordResetResponse>> resendOtpResetPassword(
+          @Valid @RequestBody ResendOtpPasswordResetRequest request) {
+
+      ResendOtpPasswordResetResponse response = authService.resendOtpPasswordReset(request);
+      return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @PostMapping("/password-reset/verify")
@@ -121,12 +152,13 @@ public class AuthController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-  @PostMapping("/change-password")
+  @PutMapping("/change-password")
   public ResponseEntity<ApiResponse<Void>> changePassword(
-      @RequestHeader("X-Account-Id") String accountId,
-      @Valid @RequestBody ChangePasswordRequest request) {
+          @Valid @RequestBody ChangePasswordRequest request) {
 
-    authService.changePassword(UUID.fromString(accountId), request);
-    return ResponseEntity.ok(ApiResponse.success(null));
+      UUID accountId = SecurityUtils.getCurrentAccountId();
+
+      authService.changePassword(accountId, request);
+      return ResponseEntity.ok(ApiResponse.success(null));
   }
 }

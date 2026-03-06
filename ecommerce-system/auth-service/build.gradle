@@ -50,6 +50,12 @@ dependencies {
     // Provides RabbitMQ integration using AMQP protocol (message queues, producers, consumers, listeners)
     implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
+    // Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // gRPC Client
+    implementation 'net.devh:grpc-client-spring-boot-starter:3.1.0.RELEASE'
+
     // MapStruct: Code generator for mapping between Java bean types
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 

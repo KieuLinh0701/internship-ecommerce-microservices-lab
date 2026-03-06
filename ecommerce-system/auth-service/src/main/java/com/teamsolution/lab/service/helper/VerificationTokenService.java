@@ -1,5 +1,6 @@
 package com.teamsolution.lab.service.helper;
 
+import com.teamsolution.lab.config.properties.OtpSecurityProperties;
 import com.teamsolution.lab.entity.Account;
 import com.teamsolution.lab.entity.VerificationToken;
 import com.teamsolution.lab.enums.VerificationTokenType;
@@ -8,15 +9,18 @@ import com.teamsolution.lab.exception.ResourceNotFoundException;
 import com.teamsolution.lab.repository.VerificationTokenRepository;
 import com.teamsolution.lab.util.OtpUtils;
 import com.teamsolution.lab.util.UuidGenerator;
-import java.time.LocalDateTime;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class VerificationTokenService {
+
+    private final OtpSecurityProperties otpSecurityProperties;
   private final VerificationTokenRepository verificationTokenRepository;
 
   public String generateAndSave(Account account, VerificationTokenType type) {
@@ -25,15 +29,13 @@ public class VerificationTokenService {
 
     String rawOtp = RandomStringUtils.randomNumeric(6);
 
-    String hashedOtp = OtpUtils.hashOtp(rawOtp);
-
     VerificationToken token =
         VerificationToken.builder()
             .id(UuidGenerator.generate())
             .account(account)
-            .token(hashedOtp)
+            .token(OtpUtils.hashOtp(rawOtp))
             .type(type)
-            .expiresAt(LocalDateTime.now().plusMinutes(15))
+            .expiresAt(LocalDateTime.now().plusSeconds(otpSecurityProperties.getVerificationExpiresInSeconds()))
             .isUsed(false)
             .build();
 
@@ -43,26 +45,31 @@ public class VerificationTokenService {
   }
 
   public VerificationToken verifyOtp(UUID accountId, String rawOtp, VerificationTokenType type) {
-    // Hash the incoming OTP to compare with stored hashed OTP
-    String hashedOtp = OtpUtils.hashOtp(rawOtp);
-
-    // find token by account id, token, type and isUsed false
     VerificationToken verificationToken =
         verificationTokenRepository
-            .findByAccountIdAndTokenAndTypeAndIsUsedFalse(accountId, hashedOtp, type)
+            .findByAccountIdAndTokenAndTypeAndIsUsedFalse(accountId, OtpUtils.hashOtp(rawOtp), type)
             .orElseThrow(() -> new ResourceNotFoundException("Invalid or used token"));
 
-    // check if token expired
     if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
       throw new InvalidTokenException("Token expired");
     }
 
-    // Mark token used
     verificationToken.setUsed(true);
-
-    // Save
     verificationTokenRepository.save(verificationToken);
-
     return verificationToken;
+  }
+
+  public VerificationToken findActiveToken(UUID accountId, VerificationTokenType type) {
+      return verificationTokenRepository.findActiveToken(accountId, type)
+              .orElseThrow(() ->
+                      new ResourceNotFoundException(
+                              "No active " + type.name().toLowerCase().replace("_", " ")
+                                      + " request found."
+                      )
+              );
+  }
+
+  public void save(VerificationToken token) {
+      verificationTokenRepository.save(token);
   }
 }

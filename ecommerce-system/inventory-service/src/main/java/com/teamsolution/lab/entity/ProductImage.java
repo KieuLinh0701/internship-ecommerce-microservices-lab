@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 @SuperBuilder
 public class ProductImage extends BaseEntity {
 
