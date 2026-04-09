@@ -27,6 +27,7 @@ allprojects {
     // Spotless configuration
     spotless {
         java {
+            targetExclude('build/generated/**/*.java')
             googleJavaFormat()
             removeUnusedImports()
             trimTrailingWhitespace()

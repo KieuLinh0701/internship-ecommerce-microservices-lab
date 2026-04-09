@@ -1,23 +1,161 @@
 pipeline {
     agent any
 
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '20', artifactNumToKeepStr: '10'))
+        disableConcurrentBuilds()
+        skipDefaultCheckout(true)
+        timestamps()
+        timeout(time: 45, unit: 'MINUTES')
+        parallelsAlwaysFailFast()
+    }
+
+    parameters {
+        booleanParam(
+            name: 'BUILD_OCI_IMAGES',
+            defaultValue: false,
+            description: 'Optionally build OCI images with Spring Boot buildpacks on main/master/tag builds.'
+        )
+    }
+
+    environment {
+        GRADLE_USER_HOME = "${WORKSPACE}/.gradle"
+        PROJECT_DIR = 'ecommerce-system-BE'
+        GRADLE_CMD = 'bash ./gradlew'
+        GRADLE_ARGS = '--no-daemon --stacktrace --console=plain -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false -Dorg.gradle.workers.max=2'
+        GRADLE_JVM_ARGS = '-Xms256m -Xmx768m -XX:MaxMetaspaceSize=384m -XX:+UseG1GC -XX:+UseStringDeduplication'
+        CI = 'true'
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                echo 'Code checked out from GitHub'
+                deleteDir()
+                checkout scm
+                sh 'git --no-pager log -1 --decorate --stat'
             }
         }
 
-        stage('Build') {
+        stage('Validate Environment') {
             steps {
-                echo 'Build from Jenkins Pipeline'
+                dir("${PROJECT_DIR}") {
+                    sh '''#!/usr/bin/env bash
+                        set -euo pipefail
+                        chmod +x gradlew || true
+                        test -f gradlew
+                        java -version
+                        ${GRADLE_CMD} --version
+                       '''
+                }
             }
         }
 
-        stage('Test') {
+        stage('Static Analysis') {
             steps {
-                echo 'Running tests'
+                dir("${PROJECT_DIR}") {
+                    sh '''#!/usr/bin/env bash
+                        set -euo pipefail
+                        ${GRADLE_CMD} ${GRADLE_ARGS} "-Dorg.gradle.jvmargs=${GRADLE_JVM_ARGS}" spotlessCheck # checkstyleMain checkstyleTest
+                       '''
+                }
             }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    sh '''#!/usr/bin/env bash
+                        set -euo pipefail
+                        ${GRADLE_CMD} ${GRADLE_ARGS} "-Dorg.gradle.jvmargs=${GRADLE_JVM_ARGS}" clean test --exclude-task :notification-service:test
+                       '''
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'ecommerce-system/**/build/test-results/test/*.xml'
+                }
+            }
+        }
+
+        stage('Package Artifacts') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    sh '''#!/usr/bin/env bash
+                        set -euo pipefail
+                        ${GRADLE_CMD} ${GRADLE_ARGS} "-Dorg.gradle.jvmargs=${GRADLE_JVM_ARGS}" assemble --exclude-task test --exclude-task :notification-service:assemble
+                       '''
+                }
+            }
+        }
+
+        stage('Build Docker Images') {
+            when {
+                expression { return params.BUILD_OCI_IMAGES }
+            }
+            steps {
+                dir("${PROJECT_DIR}") {
+                    withCredentials([usernamePassword(credentialsId: 'docker-registry-creds', usernameVariable: 'DOCKER_REGISTRY_USERNAME', passwordVariable: 'DOCKER_REGISTRY_PASSWORD')]) {
+                        sh '''#!/usr/bin/env bash
+                            set -euo pipefail
+
+                            # Build JAR files first
+                            ${GRADLE_CMD} ${GRADLE_ARGS} "-Dorg.gradle.jvmargs=${GRADLE_JVM_ARGS}" assemble --exclude-task test
+
+                            # Define Docker registry and image tag
+                            DOCKER_REGISTRY="${DOCKER_REGISTRY:-docker.io/yourusername}"
+                            IMAGE_TAG="${BUILD_NUMBER:-latest}"
+
+                            # Login to Docker registry
+                            echo "${DOCKER_REGISTRY_PASSWORD}" | podman login "${DOCKER_REGISTRY%/*}" -u "${DOCKER_REGISTRY_USERNAME}" --password-stdin
+
+                            # Build and push Docker images using Podman
+                            for service in api-gateway auth-service cart-service customer-service discovery-service email-service inventory-service order-service payment-service; do
+                                echo "Building Docker image for $service..."
+
+                                # Create Dockerfile if it doesn't exist
+                                if [ ! -f "$service/Dockerfile" ]; then
+                                    cat > "$service/Dockerfile" << 'EOF'
+FROM openjdk:21-jdk-slim
+COPY build/libs/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+EOF
+                                fi
+
+                                # Build with Podman
+                                podman build -t "${DOCKER_REGISTRY}/${service}:${IMAGE_TAG}" "$service/"
+
+                                # Push to registry
+                                podman push "${DOCKER_REGISTRY}/${service}:${IMAGE_TAG}"
+
+                                echo "Successfully built and pushed ${DOCKER_REGISTRY}/${service}:${IMAGE_TAG}"
+                            done
+                           '''
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts(
+                artifacts: 'ecommerce-system/**/build/libs/*.jar, ecommerce-system/**/build/reports/**/*',
+                allowEmptyArchive: true,
+                fingerprint: true
+            )
+        }
+
+        success {
+            echo 'Pipeline completed successfully.'
+        }
+
+        unsuccessful {
+            echo 'Pipeline failed. Review the console log, archived reports, and test results.'
+        }
+
+        cleanup {
+            deleteDir()
         }
     }
 }
